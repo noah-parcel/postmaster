@@ -22,7 +22,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .game-container {
+        .game-container, .letters {
             display: grid;
             grid-template-columns: repeat(4, 50px);
             grid-template-rows: repeat(4, 50px);
@@ -30,33 +30,18 @@
             margin-bottom: 20px;
         }
 
-        .cell {
+        .cell, .letter {
             width: 50px;
             height: 50px;
-            border: 1px solid #333;
             text-align: center;
             font-weight: bold;
             font-size: 24px;
             background-color: #f9f9f9;
-        }
-
-        .letters {
-            display: flex;
-            flex-wrap: wrap;
-            width: 224px;
-            margin-bottom: 20px;
+            border: 0;
         }
 
         .letter {
-            width: 50px;
-            height: 50px;
-            border: 1px solid #333;
-            text-align: center;
-            font-weight: bold;
-            font-size: 24px;
-            margin: 4px;
             cursor: pointer;
-            background-color: #fff;
         }
 
         .letter.selected {
@@ -82,14 +67,13 @@
         }
 
         #found-words-table th, #found-words-table td {
-            border: 1px solid #333;
+            border: 0;
             padding: 5px;
             text-align: left;
         }
 
         #found-words-table th {
-            background-color: #333;
-            color: #fff;
+            color: #333;
         }
     </style>
 </head>
@@ -110,6 +94,8 @@
         </div>
     </div>
     <script>
+        // Include the JavaScript code here
+
 const gameContainer = document.getElementById("game-container"), lettersContainer = document.getElementById("letters"), message = Object.assign(document.createElement("div"), {style: {display: "none", paddingLeft: "40px"}}), foundWordsContainer = Object.assign(document.createElement("div"), {style: {paddingLeft: "20px"}});
 document.body.append(message, foundWordsContainer);
 const createGrid = () => { for (let i = 0; i < 16; i++) { const cell = document.createElement("div"); cell.className = "cell"; cell.onclick = placeLetter; gameContainer.appendChild(cell); }};
