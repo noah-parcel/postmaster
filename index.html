@@ -2,7 +2,7 @@
 <html>
 <head>
 <style>
-td{width:30px;height:30px;text-align:center;}
+td{width:30px;height:30px;text-align:center;border:1px solid black;}
 </style>
 <script>
 const words = new Set(["list","your","common","words","here"]);
@@ -14,8 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
   g.onclick = e => {
     const t = e.target;
     if (t.tagName == "TD") {
-      t.innerText = p.innerText[0];
-      p.innerHTML = p.innerText.slice(1) + randChar();
+      const idx = p.innerText.indexOf(t.innerText);
+      p.innerHTML = p.innerText.slice(0, idx) + randChar() + p.innerText.slice(idx + 1);
+      t.innerText = p.innerText[idx];
       const w = getWords(g);
       f.innerHTML = w.filter(x => words.has(x)).join(", ");
     }
@@ -53,7 +54,7 @@ function getWords(g) {
 </head>
 <body>
 <p id="pool"></p>
-<table id="grid"><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>
+<table id="grid" cellspacing="0" cellpadding="0"><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>
 <p>Words: <span id="found"></span></p>
 </body>
 </html>
