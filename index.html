@@ -140,17 +140,23 @@ function addFoundWord(word) {
   wordDiv.textContent = word;
   foundWordsContainer.appendChild(wordDiv);
 }
-
+        
 async function checkForWords() {
   const gridLetters = getGridLetters();
   for (let i = 0; i < 16; i++) {
     const row = Math.floor(i / 4), col = i % 4;
-    const horizontal = gridLetters.slice(i, i + 4).join(""), vertical = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + col], gridLetters[(row + 2) * 4 + col], gridLetters[(row + 3) * 4 + col]].join("");
-    if ((validWords.includes(horizontal) || validWords.includes(vertical)) && !foundWords.has(horizontal) && !foundWords.has(vertical)) {
-      const foundWord = validWords.includes(horizontal) ? horizontal : vertical;
-      showMessage(`Found a valid word: ${foundWord}`);
-      foundWords.add(foundWord);
-      addFoundWord(foundWord);
+    const horizontal = gridLetters.slice(i, i + 4).join("");
+    const vertical = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + col], gridLetters[(row + 2) * 4 + col], gridLetters[(row + 3) * 4 + col]].join("");
+    const diagonal1 = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + (col + 1)], gridLetters[(row + 2) * 4 + (col + 2)], gridLetters[(row + 3) * 4 + (col + 3)]].join("");
+    const diagonal2 = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + (col - 1)], gridLetters[(row + 2) * 4 + (col - 2)], gridLetters[(row + 3) * 4 + (col - 3)]].join("");
+
+    const foundWordsList = [horizontal, vertical, diagonal1, diagonal2];
+    for (const foundWord of foundWordsList) {
+      if (validWords.includes(foundWord) && !foundWords.has(foundWord)) {
+        showMessage(`Found a valid word: ${foundWord}`);
+        foundWords.add(foundWord);
+        addFoundWord(foundWord);
+      }
     }
   }
 }
