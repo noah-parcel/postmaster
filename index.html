@@ -56,62 +56,102 @@
         <div id="letters"></div>
     </div>
     <script>
-        const gameContainer = document.getElementById("game-container");
-        const lettersContainer = document.getElementById("letters");
+        
+const gameContainer = document.getElementById("game-container");
+const lettersContainer = document.getElementById("letters");
 
-        function createGrid() {
-            for (let i = 0; i < 16; i++) {
-                const cell = document.createElement("div");
-                cell.className = "cell";
-                cell.addEventListener("click", placeLetter);
-                gameContainer.appendChild(cell);
-            }
-        }
+function createGrid() {
+  for (let i = 0; i < 16; i++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.addEventListener("click", placeLetter);
+    gameContainer.appendChild(cell);
+  }
+}
 
-        function generateRandomLetters() {
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const letters = [];
+function generateRandomLetters() {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const letters = [];
 
-            for (let i = 0; i < 16; i++) {
-                const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
-                letters.push(randomLetter);
-            }
+  for (let i = 0; i < 16; i++) {
+    const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+    letters.push(randomLetter);
+  }
 
-            return letters;
-        }
+  return letters;
+}
 
-        function displayLetters(letters) {
-            letters.forEach(letter => {
-                const letterDiv = document.createElement("div");
-                letterDiv.textContent = letter;
-                letterDiv.className = "letter";
-                letterDiv.addEventListener("click", selectLetter);
-                lettersContainer.appendChild(letterDiv);
-            });
-        }
+function displayLetters(letters) {
+  letters.forEach(letter => {
+    const letterDiv = document.createElement("div");
+    letterDiv.textContent = letter;
+    letterDiv.className = "letter";
+    letterDiv.addEventListener("click", selectLetter);
+    lettersContainer.appendChild(letterDiv);
+  });
+}
 
-        let selectedLetter = null;
+let selectedLetter = null;
 
-        function selectLetter(event) {
-            const letterDiv = event.target;
-            selectedLetter = letterDiv.textContent;
-            letterDiv.classList.add("selected");
-        }
+function selectLetter(event) {
+  const letterDiv = event.target;
+  selectedLetter = letterDiv.textContent;
+  letterDiv.classList.add("selected");
+}
 
-        function placeLetter(event) {
-            const cell = event.target;
-            if (selectedLetter && !cell.textContent) {
-                cell.textContent = selectedLetter;
-                const letterDiv = document.querySelector(`.letter.selected`);
-                letterDiv.classList.remove("selected");
-                letterDiv.removeEventListener("click", selectLetter);
-                selectedLetter = null;
-            }
-        }
+function placeLetter(event) {
+  const cell = event.target;
+  if (selectedLetter && !cell.textContent) {
+    cell.textContent = selectedLetter;
+    const letterDiv = document.querySelector(`.letter.selected`);
+    letterDiv.classList.remove("selected");
+    letterDiv.removeEventListener("click", selectLetter);
+    selectedLetter = null;
+  }
+  checkForWords();
+}
 
-        createGrid();
-        const randomLetters = generateRandomLetters();
-        displayLetters(randomLetters);
+const validWords = [
+  "word", "test", "grid", "gain", "play", "four", "cats", "dogs", "flow", "jump"
+].map(word => word.toUpperCase());
+
+function getGridLetters() {
+  const cells = document.querySelectorAll(".cell");
+  let gridLetters = [];
+  for (let i = 0; i < 16; i++) {
+    gridLetters.push(cells[i].textContent);
+  }
+  return gridLetters;
+}
+
+function checkForWords() {
+  const gridLetters = getGridLetters();
+  for (let i = 0; i < 16; i++) {
+    const row = Math.floor(i / 4);
+    const col = i % 4;
+
+    const horizontal = gridLetters.slice(i, i + 4).join("");
+    const vertical = [
+      gridLetters[row * 4 + col],
+      gridLetters[(row + 1) * 4 + col],
+      gridLetters[(row + 2) * 4 + col],
+      gridLetters[(row + 3) * 4 + col]
+    ].join("");
+
+    if (validWords.includes(horizontal)) {
+      console.log(`Found a valid word: ${horizontal}`);
+    }
+
+    if (validWords.includes(vertical)) {
+      console.log(`Found a valid word: ${vertical}`);
+    }
+  }
+}
+
+createGrid();
+const randomLetters = generateRandomLetters();
+displayLetters(randomLetters);
+
     </script>
 </body>
 </html>
