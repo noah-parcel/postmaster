@@ -1,92 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Letter Grid Game</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Helvetica, sans-serif;
-        }
-
-        #game-container {
-            display: grid;
-            grid-template-columns: repeat(4, 50px);
-            grid-template-rows: repeat(4, 50px);
-            grid-gap: 5px;
-        }
-
-        .cell {
-            width: 50px;
-            height: 50px;
-            background-color: #f0f3f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-        }
-
-        #letters {
-            display: flex;
-            flex-wrap: wrap;
-            width: 220px;
-            margin-top: 20px;
-        }
-
-        .letter {
-            width: 50px;
-            height: 50px;
-            background-color: #b8e994;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2.5px;
-            cursor: pointer;
-            font-size: 24px;
-            font-weight: bold;
-            color: #2d3436;
-        }
-        
-        #words-container {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-        }
-        
-        #words-container ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        #words-container li {
-            margin: 10px 0;
-            color: #2d3436;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4x4 Word Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div>
-        <div id="game-container"></div>
-        <div id="letters"></div>
-        <div id="words-container">
-            <h2>Identified Words:</h2>
-            <ul></ul>
-        </div>
-    </div>
-
-  <script>
-
-const a="ABCDEFGHIJKLMNOPQRSTUVWXYZ",w=4,h=w*w,v=[],r=_=>a[Math.floor(Math.random()*26)],g=Array.from({length:h},(_,i)=>document.getElementById("game-container").appendChild(document.createElement("div")).addEventListener("click",()=>(c=t.textContent,t.textContent=r(),t.classList.remove("selected"),c&&s.push(c),s.push(t.textContent),checkForWords(t.dataset.x,t.dataset.y))),l=Array.from({length:h},()=>(t=document.createElement("div"),t.classList.add("letter"),t.addEventListener("click",()=>(l.forEach(t=>t!=e&&t.classList.remove("selected")),e=t,e.classList.add("selected"))),e=null,t.textContent=r(),document.getElementById("letters").appendChild(t))),c,s=[],n=(x,y,d=[])=>{for(let i=0;i<w;i++)d.push(g[y*w+i].textContent),d.push(g[i*w+x].textContent),x+i<w&&y+i<w&&d.push(g[(y+i)*w+x+i].textContent),x-i>=0&&y+i<w&&d.push(g[(y+i)*w+x-i].textContent);return d.join("")},checkForWords=(x,y)=>{let [h,v,d1,d2]=[[...g.slice(y*w,(y+1)*w).map(e=>e.textContent)],[...g.filter((_,i)=>i%x==x).map(e=>e.textContent)],[...n(x,y)],[...n(x,y,[])]];[...h,...v,...d1,...d2].forEach(word=>{if(word.length==4&&!v.includes(word)){v.push(word);const t=document.createElement("div");t.classList.add("found-word"),t.textContent=word,document.getElementById("found-words").appendChild(t)}})},fetch("https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt").then(e=>e.text()).then(e=>v=e.split("\n").filter(e=>e.length==4)).catch(e=>console.error("Failed to fetch valid words:",e));
-
-  </script>
+  <h1>4x4 Word Game</h1>
+  <div id="grid" class="grid"></div>
+  <h2>Words Found:</h2>
+  <div id="words-found" class="words-found"></div>
+  <script src="script.js"></script>
 </body>
 </html>
