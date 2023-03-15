@@ -63,17 +63,17 @@ const message = document.createElement("div");
 const foundWordsContainer = document.createElement("div");
 document.body.appendChild(message);
 document.body.appendChild(foundWordsContainer);
-
+    
 async function getFourLetterWords() {
   try {
-    const response = await fetch('https://api.datamuse.com/words?sp=????');
-    const words = await response.json();
-    return words.map(wordObj => wordObj.word.toUpperCase());
+    const response = await fetch('https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt');
+    const text = await response.text();
+    return text.split('\n').map(word => word.toUpperCase());
   } catch (error) {
     console.error('Error fetching 4-letter words:', error);
     return [];
   }
-}
+}     
 
 createGrid();
 (async () => {
