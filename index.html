@@ -140,13 +140,20 @@ function checkForWords(x, y) {
   checkWords(diagonal2.join(""));
 }
 
-// check if a word is valid and display it if it is
+           
 function checkWords(word) {
   if (validWords.includes(word)) {
     const foundWord = document.querySelector(`#found-words div[data-word="${word}"]`);
     if (!foundWord) {
       const div = document.createElement("div");
-     
+      div.dataset.word = word;
+      div.textContent = word;
+      document.getElementById("found-words").appendChild(div);
+      document.getElementById("message").textContent = `${word} found!`;
+      setTimeout(() => document.getElementById("message").textContent = "", 2000);
+    }
+  }
+}
 
       
   </script>
