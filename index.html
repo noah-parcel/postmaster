@@ -60,7 +60,9 @@
 const gameContainer = document.getElementById("game-container");
 const lettersContainer = document.getElementById("letters");
 const message = document.createElement("div");
+const foundWordsContainer = document.createElement("div");
 document.body.appendChild(message);
+document.body.appendChild(foundWordsContainer);
 
 async function getFourLetterWords() {
   try {
@@ -105,6 +107,7 @@ function displayLetters(letters) {
 
 let selectedLetter = null;
 let validWords = [];
+let foundWords = new Set();
 
 function selectLetter(event) {
   const letterDiv = event.target;
@@ -116,7 +119,9 @@ function placeLetter(event) {
   const cell = event.target;
   if (selectedLetter && !cell.textContent) {
     cell.textContent = selectedLetter;
-    document.querySelector(`.letter.selected`).classList.remove("selected");
+    const selectedLetterDiv = document.querySelector(`.letter.selected`);
+    selectedLetterDiv.textContent = generateRandomLetters()[0];
+    selectedLetterDiv.classList.remove("selected");
     selectedLetter = null;
   }
   checkForWords();
@@ -130,14 +135,26 @@ function showMessage(text) {
   message.textContent = text;
 }
 
+function addFoundWord(word) {
+  const wordDiv = document.createElement("div");
+  wordDiv.textContent = word;
+  foundWordsContainer.appendChild(wordDiv);
+}
+
 async function checkForWords() {
   const gridLetters = getGridLetters();
   for (let i = 0; i < 16; i++) {
     const row = Math.floor(i / 4), col = i % 4;
     const horizontal = gridLetters.slice(i, i + 4).join(""), vertical = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + col], gridLetters[(row + 2) * 4 + col], gridLetters[(row + 3) * 4 + col]].join("");
-    if (validWords.includes(horizontal) || validWords.includes(vertical)) { showMessage(`Found a valid word: ${validWords.includes(horizontal) ? horizontal : vertical}`); }
+    if ((validWords.includes(horizontal) || validWords.includes(vertical)) && !foundWords.has(horizontal) && !foundWords.has(vertical)) {
+      const foundWord = validWords.includes(horizontal) ? horizontal : vertical;
+      showMessage(`Found a valid word: ${foundWord}`);
+      foundWords.add(foundWord);
+      addFoundWord(foundWord);
+    }
   }
 }
+
 
 
     </script>
