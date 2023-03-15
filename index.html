@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Grid Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            display: grid;
+            grid-template-columns: repeat(4, 50px);
+            grid-template-rows: repeat(4, 50px);
+            grid-gap: 5px;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: lightblue;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #letters {
+            display: flex;
+            flex-wrap: wrap;
+            width: 220px;
+            margin-top: 20px;
+        }
+
+        .letter {
+            width: 50px;
+            height: 50px;
+            background-color: lightgreen;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2.5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="game-container"></div>
+        <div id="letters"></div>
+    </div>
+    <script>
+        const gameContainer = document.getElementById("game-container");
+        const lettersContainer = document.getElementById("letters");
+
+        function createGrid() {
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.addEventListener("click", placeLetter);
+                gameContainer.appendChild(cell);
+            }
+        }
+
+        function generateRandomLetters() {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const letters = [];
+
+            for (let i = 0; i < 16; i++) {
+                const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+                letters.push(randomLetter);
+            }
+
+            return letters;
+        }
+
+        function displayLetters(letters) {
+            letters.forEach(letter => {
+                const letterDiv = document.createElement("div");
+                letterDiv.textContent = letter;
+                letterDiv.className = "letter";
+                letterDiv.addEventListener("click", selectLetter);
+                lettersContainer.appendChild(letterDiv);
+            });
+        }
+
+        let selectedLetter = null;
+
+        function selectLetter(event) {
+            const letterDiv = event.target;
+            selectedLetter = letterDiv.textContent;
+            letterDiv.classList.add("selected");
+        }
+
+        function placeLetter(event) {
+            const cell = event.target;
+            if (selectedLetter && !cell.textContent) {
+                cell.textContent = selectedLetter;
+                const letterDiv = document.querySelector(`.letter.selected`);
+                letterDiv.classList.remove("selected");
+                letterDiv.removeEventListener("click", selectLetter);
+                selectedLetter = null;
+            }
+        }
+
+        createGrid();
+        const randomLetters = generateRandomLetters();
+        displayLetters(randomLetters);
+    </script>
+</body>
+</html>
