@@ -57,111 +57,20 @@
     </div>
     <script>
         
-const gameContainer = document.getElementById("game-container");
-const lettersContainer = document.getElementById("letters");
-const message = document.createElement("div");
-const foundWordsContainer = document.createElement("div");
-document.body.appendChild(message);
-document.body.appendChild(foundWordsContainer);
-    
-async function getFourLetterWords() {
-  try {
-    const response = await fetch('https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt');
-    const text = await response.text();
-    return text.split('\n').map(word => word.toUpperCase());
-  } catch (error) {
-    console.error('Error fetching 4-letter words:', error);
-    return [];
-  }
-}     
-
-createGrid();
-(async () => {
-  displayLetters(generateRandomLetters());
-  validWords = await getFourLetterWords();
-})();
-
-function createGrid() {
-  for (let i = 0; i < 16; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.addEventListener("click", placeLetter);
-    gameContainer.appendChild(cell);
-  }
-}
-
-function generateRandomLetters() {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  return Array.from({length: 16}, () => alphabet[Math.floor(Math.random() * alphabet.length)]);
-}
-
-function displayLetters(letters) {
-  letters.forEach(letter => {
-    const letterDiv = document.createElement("div");
-    letterDiv.textContent = letter;
-    letterDiv.className = "letter";
-    letterDiv.addEventListener("click", selectLetter);
-    lettersContainer.appendChild(letterDiv);
-  });
-}
-
-let selectedLetter = null;
-let validWords = [];
-let foundWords = new Set();
-
-function selectLetter(event) {
-  const letterDiv = event.target;
-  selectedLetter = letterDiv.textContent;
-  letterDiv.classList.add("selected");
-}
-
-function placeLetter(event) {
-  const cell = event.target;
-  if (selectedLetter && !cell.textContent) {
-    cell.textContent = selectedLetter;
-    const selectedLetterDiv = document.querySelector(`.letter.selected`);
-    selectedLetterDiv.textContent = generateRandomLetters()[0];
-    selectedLetterDiv.classList.remove("selected");
-    selectedLetter = null;
-  }
-  checkForWords();
-}
-
-function getGridLetters() {
-  return Array.from(document.querySelectorAll(".cell"), cell => cell.textContent);
-}
-
-function showMessage(text) {
-  message.textContent = text;
-}
-
-function addFoundWord(word) {
-  const wordDiv = document.createElement("div");
-  wordDiv.textContent = word;
-  foundWordsContainer.appendChild(wordDiv);
-}
-        
-async function checkForWords() {
-  const gridLetters = getGridLetters();
-  for (let i = 0; i < 16; i++) {
-    const row = Math.floor(i / 4), col = i % 4;
-    const horizontal = gridLetters.slice(i, i + 4).join("");
-    const vertical = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + col], gridLetters[(row + 2) * 4 + col], gridLetters[(row + 3) * 4 + col]].join("");
-    const diagonal1 = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + (col + 1)], gridLetters[(row + 2) * 4 + (col + 2)], gridLetters[(row + 3) * 4 + (col + 3)]].join("");
-    const diagonal2 = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + (col - 1)], gridLetters[(row + 2) * 4 + (col - 2)], gridLetters[(row + 3) * 4 + (col - 3)]].join("");
-
-    const foundWordsList = [horizontal, vertical, diagonal1, diagonal2];
-    for (const foundWord of foundWordsList) {
-      if (validWords.includes(foundWord) && !foundWords.has(foundWord)) {
-        showMessage(`Found a valid word: ${foundWord}`);
-        foundWords.add(foundWord);
-        addFoundWord(foundWord);
-      }
-    }
-  }
-}
-
-
+const gameContainer = document.getElementById("game-container"), lettersContainer = document.getElementById("letters"), message = Object.assign(document.createElement("div"), {style: {display: "none", paddingLeft: "20px"}}), foundWordsContainer = Object.assign(document.createElement("div"), {style: {paddingLeft: "20px"}});
+document.body.append(message, foundWordsContainer);
+const createGrid = () => { for (let i = 0; i < 16; i++) { const cell = document.createElement("div"); cell.className = "cell"; cell.onclick = placeLetter; gameContainer.appendChild(cell); }};
+const generateRandomLetters = () => Array.from({length: 16}, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)]);
+const displayLetters = letters => { letters.forEach(letter => { const letterDiv = document.createElement("div"); letterDiv.textContent = letter; letterDiv.className = "letter"; letterDiv.onclick = selectLetter; lettersContainer.appendChild(letterDiv); });};
+let selectedLetter = null, validWords = [], foundWords = new Set();
+const fetchWords = async () => { try { const res = await fetch('https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt'); const text = await res.text(); return text.split('\n').map(word => word.toUpperCase()); } catch (error) { console.error('Error fetching 4-letter words:', error); return []; }};
+createGrid(); displayLetters(generateRandomLetters()); fetchWords().then(words => validWords = words);
+function selectLetter() { selectedLetter = this.textContent; this.classList.add("selected"); }
+function placeLetter() { if (selectedLetter && !this.textContent) { this.textContent = selectedLetter; const selectedLetterDiv = document.querySelector(`.letter.selected`); selectedLetterDiv.textContent = generateRandomLetters()[0]; selectedLetterDiv.classList.remove("selected"); selectedLetter = null; } checkForWords(); }
+function getGridLetters() { return Array.from(document.querySelectorAll(".cell"), cell => cell.textContent); }
+function showMessage(text) { message.style.display = "block"; message.textContent = text; }
+function addFoundWord(word) { const wordDiv = document.createElement("div"); wordDiv.textContent = word; foundWordsContainer.appendChild(wordDiv); }
+async function checkForWords() { const gridLetters = getGridLetters(); for (let i = 0; i < 16; i++) { const row = Math.floor(i / 4), col = i % 4, getWord = (r, c) => [gridLetters[row * 4 + col], gridLetters[(row + r) * 4 + (col + c)], gridLetters[(row + r * 2) * 4 + (col + c * 2)], gridLetters[(row + r * 3) * 4 + (col + c * 3)]].join(""); const foundWordsList = [[0, 1], [1, 0], [1, 1], [1, -1]].map(([r, c]) => getWord(r, c)); for (const foundWord of foundWordsList) { if (validWords.includes(foundWord) && !foundWords.has(foundWord)) { showMessage(`Found a valid word: ${foundWord}`); foundWords.add(foundWord); addFoundWord(foundWord); break; } } } }
 
     </script>
 </body>
