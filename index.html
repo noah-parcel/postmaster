@@ -1,73 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Game</title>
-    <style>
-        body, .container {margin: 0;}
-        body {font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f3f3f3;}
-        .container {background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);}
-        .game-container, .letters {display: grid; grid-template-columns: repeat(4, 50px); grid-template-rows: repeat(4, 50px); gap: 4px; margin-bottom: 20px;}
-        .cell, .letter {width: 50px; height: 50px; text-align: center; font-weight: bold; font-size: 24px; background-color: #f9f9f9; border: 0;}
-        .letter {cursor: pointer;}
-        .letter.selected {background-color: #ccc;}
-        #message {display: none; padding-left: 30px;}
-        #found-words-table {padding-left: 30px; border-collapse: collapse; width: 50%;}
-        #found-words-table th, #found-words-table td {border: 0; padding: 5px; text-align: left;}
-        #found-words-table th {color: #333;}
-    </style>
+  <meta charset="UTF-8">
+  <title>Word Finder Game</title>
+  <style>
+    /* add some basic styling to make the game look nicer */
+    #game-container {
+      margin: 50px auto;
+      width: 300px;
+      height: 300px;
+      border: 2px solid black;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .cell {
+      width: 60px;
+      height: 60px;
+      border: 1px solid black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .cell.selected {
+      background-color: yellow;
+    }
+    #letters-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .letter {
+      margin: 0 10px;
+      cursor: pointer;
+    }
+    #message,
+    #found-words {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="game-container" id="game-container"></div>
-        <div class="letters" id="letters"></div>
-        <div>
-            <div id="message"></div>
-            <table id="found-words-table">
-                <thead><tr><th>Valid Words</th></tr></thead>
-                <tbody id="found-words-container"></tbody>
-            </table>
-        </div>
-    </div>
-    <script>
-        // Include the JavaScript code here
-const gameContainer = document.getElementById("game-container"), lettersContainer = document.getElementById("letters"), message = Object.assign(document.createElement("div"), {style: {display: "none", paddingLeft: "40px"}}), foundWordsContainer = Object.assign(document.createElement("div"), {style: {paddingLeft: "20px"}});
-document.body.append(message, foundWordsContainer);
-const createGrid = () => { for (let i = 0; i < 16; i++) { const cell = document.createElement("div"); cell.className = "cell"; cell.onclick = placeLetter; gameContainer.appendChild(cell); }};
-const generateRandomLetters = () => Array.from({length: 16}, () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)]);
-const displayLetters = letters => { letters.forEach(letter => { const letterDiv = document.createElement("div"); letterDiv.textContent = letter; letterDiv.className = "letter"; letterDiv.onclick = selectLetter; lettersContainer.appendChild(letterDiv); });};
-let selectedLetter = null, validWords = [], foundWords = new Set();
-const fetchWords = async () => { try { const res = await fetch('https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt'); const text = await res.text(); return text.split('\n').map(word => word.toUpperCase()); } catch (error) { console.error('Error fetching 4-letter words:', error); return []; }};
-createGrid(); displayLetters(generateRandomLetters()); fetchWords().then(words => validWords = words);
-function selectLetter() { selectedLetter = this.textContent; this.classList.add("selected"); }
-function placeLetter() { if (selectedLetter && !this.textContent) { this.textContent = selectedLetter; const selectedLetterDiv = document.querySelector(`.letter.selected`); selectedLetterDiv.textContent = generateRandomLetters()[0]; selectedLetterDiv.classList.remove("selected"); selectedLetter = null; } checkForWords(); }
-function getGridLetters() { return Array.from(document.querySelectorAll(".cell"), cell => cell.textContent); }
+  <div id="game-container"></div>
+  <div id="letters-container"></div>
+  <div id="message"></div>
+  <div id="found-words"></div>
 
-function showMessage(text) {
-  if (message.style.display === "none") {
-    message.style.display = "block";
-    message.textContent = "Found a valid word:";
+  <script>
+      
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const gridWidth = 4;
+const gridHeight = 4;
+let grid = [], letters = [], selectedLetter, validWords = [];
+
+// set up the game container and grid
+const gameContainer = document.getElementById("game-container");
+grid = Array.from({length: gridWidth * gridHeight}, (_, i) => {
+  const cell = gameContainer.appendChild(document.createElement("div"));
+  cell.classList.add("cell");
+  cell.dataset.x = i % gridWidth;
+  cell.dataset.y = Math.floor(i / gridWidth);
+  cell.addEventListener("click", () => placeLetter(cell));
+  return cell;
+});
+
+// set up the letters container and pool
+const lettersContainer = document.getElementById("letters-container");
+letters = Array.from({length: gridWidth * gridHeight}, () => {
+  const letter = lettersContainer.appendChild(document.createElement("div"));
+  letter.classList.add("letter");
+  letter.textContent = getRandomLetter();
+  letter.addEventListener("click", () => selectLetter(letter));
+  return letter;
+});
+
+// fetch the list of valid words
+fetch("https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt")
+  .then(response => response.text())
+  .then(data => validWords = data.split("\n").filter(word => word.length === 4))
+  .catch(error => console.error("Failed to fetch valid words:", error));
+
+// generate a random letter from the alphabet
+function getRandomLetter() {
+  return alphabet[Math.floor(Math.random() * alphabet.length)];
+}
+
+// select a letter from the pool
+function selectLetter(letter) {
+  if (selectedLetter) {
+    selectedLetter.classList.remove("selected");
   }
-  const wordDiv = document.createElement("div");
-  wordDiv.textContent = text;
-  foundWordsContainer.appendChild(wordDiv);
+  selectedLetter = letter;
+  selectedLetter.classList.add("selected");
 }
 
-function addFoundWord(word) {
-  const row = document.createElement("tr");
-  const cell = document.createElement("td");
-  cell.textContent = word;
-  cell.style.border = "1px solid black";
-  cell.style.padding = "5px";
-  row.appendChild(cell);
-  foundWordsContainer.appendChild(row);
+// place a selected letter in the grid
+function placeLetter(cell) {
+  if (!selectedLetter) {
+    return;
+  }
+  const x = parseInt(cell.dataset.x);
+  const y = parseInt(cell.dataset.y);
+  const letter = selectedLetter.textContent;
+  cell.textContent = letter;
+  selectedLetter.textContent = getRandomLetter();
+  selectedLetter.classList.remove("selected");
+  selectedLetter = null;
+  checkForWords(x, y);
 }
-        
-async function checkForWords() { const gridLetters = getGridLetters(); for (let i = 0; i < 16; i++) { const row = Math.floor(i / 4), col = i % 4, getWord = (r, c) => [gridLetters[row * 4 + col], gridLetters[(row + r) * 4 + (col + c)], gridLetters[(row + r * 2) * 4 + (col + c * 2)], gridLetters[(row + r * 3) * 4 + (col + c * 3)]].join(""); const foundWordsList = [[0, 1], [1, 0], [1, 1], [1, -1]].map(([r, c]) => getWord(r, c)); for (const foundWord of foundWordsList) { if (validWords.includes(foundWord) && !foundWords.has(foundWord)) { showMessage(`Found a valid word: ${foundWord}`); foundWords.add(foundWord); addFoundWord(foundWord); break; } } } }
-    </script>
+
+// check for valid words in the grid
+function checkForWords(x, y) {
+  const horizontal = [], vertical = [], diagonal1 = [], diagonal2 = [];
+
+  // check horizontally, vertically, and diagonally
+  for (let i = 0; i < gridWidth; i++) {
+    horizontal.push(grid[y * gridWidth + i].textContent);
+    vertical.push(grid[i * gridWidth + x].textContent);
+    if (i + x < gridWidth && i + y < gridHeight) {
+      diagonal1.push(grid[(y + i) * gridWidth + x + i].textContent);
+    }
+    if (x - i >= 0 && y + i < gridHeight) {
+      diagonal2.push(grid[(y + i) * gridWidth + x - i].textContent);
+    }
+  }
+  checkWords(horizontal.join(""));
+  checkWords(vertical.join(""));
+  checkWords(diagonal1.join(""));
+  checkWords(diagonal2.join(""));
+}
+
+// check if a word is valid and display it if it is
+function checkWords(word) {
+  if (validWords.includes(word)) {
+    const foundWord = document.querySelector(`#found-words div[data-word="${word}"]`);
+    if (!foundWord) {
+      const div = document.createElement("div");
+     
+
+      
+  </script>
 </body>
 </html>
-
-
-
