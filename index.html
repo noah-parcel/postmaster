@@ -59,6 +59,25 @@
         
 const gameContainer = document.getElementById("game-container");
 const lettersContainer = document.getElementById("letters");
+const message = document.createElement("div");
+document.body.appendChild(message);
+
+async function getFourLetterWords() {
+  try {
+    const response = await fetch('https://api.datamuse.com/words?sp=????');
+    const words = await response.json();
+    return words.map(wordObj => wordObj.word.toUpperCase());
+  } catch (error) {
+    console.error('Error fetching 4-letter words:', error);
+    return [];
+  }
+}
+
+createGrid();
+(async () => {
+  displayLetters(generateRandomLetters());
+  validWords = await getFourLetterWords();
+})();
 
 function createGrid() {
   for (let i = 0; i < 16; i++) {
@@ -71,14 +90,7 @@ function createGrid() {
 
 function generateRandomLetters() {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const letters = [];
-
-  for (let i = 0; i < 16; i++) {
-    const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
-    letters.push(randomLetter);
-  }
-
-  return letters;
+  return Array.from({length: 16}, () => alphabet[Math.floor(Math.random() * alphabet.length)]);
 }
 
 function displayLetters(letters) {
@@ -92,6 +104,7 @@ function displayLetters(letters) {
 }
 
 let selectedLetter = null;
+let validWords = [];
 
 function selectLetter(event) {
   const letterDiv = event.target;
@@ -103,54 +116,29 @@ function placeLetter(event) {
   const cell = event.target;
   if (selectedLetter && !cell.textContent) {
     cell.textContent = selectedLetter;
-    const letterDiv = document.querySelector(`.letter.selected`);
-    letterDiv.classList.remove("selected");
-    letterDiv.removeEventListener("click", selectLetter);
+    document.querySelector(`.letter.selected`).classList.remove("selected");
     selectedLetter = null;
   }
   checkForWords();
 }
 
-const validWords = [
-  "word", "test", "grid", "gain", "play", "four", "cats", "dogs", "flow", "jump"
-].map(word => word.toUpperCase());
-
 function getGridLetters() {
-  const cells = document.querySelectorAll(".cell");
-  let gridLetters = [];
-  for (let i = 0; i < 16; i++) {
-    gridLetters.push(cells[i].textContent);
-  }
-  return gridLetters;
+  return Array.from(document.querySelectorAll(".cell"), cell => cell.textContent);
 }
 
-function checkForWords() {
+function showMessage(text) {
+  message.textContent = text;
+}
+
+async function checkForWords() {
   const gridLetters = getGridLetters();
   for (let i = 0; i < 16; i++) {
-    const row = Math.floor(i / 4);
-    const col = i % 4;
-
-    const horizontal = gridLetters.slice(i, i + 4).join("");
-    const vertical = [
-      gridLetters[row * 4 + col],
-      gridLetters[(row + 1) * 4 + col],
-      gridLetters[(row + 2) * 4 + col],
-      gridLetters[(row + 3) * 4 + col]
-    ].join("");
-
-    if (validWords.includes(horizontal)) {
-      console.log(`Found a valid word: ${horizontal}`);
-    }
-
-    if (validWords.includes(vertical)) {
-      console.log(`Found a valid word: ${vertical}`);
-    }
+    const row = Math.floor(i / 4), col = i % 4;
+    const horizontal = gridLetters.slice(i, i + 4).join(""), vertical = [gridLetters[row * 4 + col], gridLetters[(row + 1) * 4 + col], gridLetters[(row + 2) * 4 + col], gridLetters[(row + 3) * 4 + col]].join("");
+    if (validWords.includes(horizontal) || validWords.includes(vertical)) { showMessage(`Found a valid word: ${validWords.includes(horizontal) ? horizontal : vertical}`); }
   }
 }
 
-createGrid();
-const randomLetters = generateRandomLetters();
-displayLetters(randomLetters);
 
     </script>
 </body>
