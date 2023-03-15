@@ -5,61 +5,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Game</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f3f3f3;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         .game-container {
             display: grid;
             grid-template-columns: repeat(4, 50px);
             grid-template-rows: repeat(4, 50px);
             gap: 4px;
+            margin-bottom: 20px;
         }
 
         .cell {
             width: 50px;
             height: 50px;
-            border: 1px solid black;
+            border: 1px solid #333;
             text-align: center;
             font-weight: bold;
             font-size: 24px;
+            background-color: #f9f9f9;
         }
 
         .letters {
             display: flex;
             flex-wrap: wrap;
             width: 224px;
+            margin-bottom: 20px;
         }
 
         .letter {
             width: 50px;
             height: 50px;
-            border: 1px solid black;
+            border: 1px solid #333;
             text-align: center;
             font-weight: bold;
             font-size: 24px;
             margin: 4px;
             cursor: pointer;
+            background-color: #fff;
         }
 
         .letter.selected {
             background-color: #ccc;
         }
+
+        #word-message-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        #message {
+            display: none;
+            padding-left: 30px;
+        }
+
+        #found-words-table {
+            padding-left: 30px;
+            border-collapse: collapse;
+            width: 50%;
+        }
+
+        #found-words-table th, #found-words-table td {
+            border: 1px solid #333;
+            padding: 5px;
+            text-align: left;
+        }
+
+        #found-words-table th {
+            background-color: #333;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
-    <div class="game-container" id="game-container"></div>
-    <div class="letters" id="letters"></div>
-    <div id="word-message-container" style="display: flex; align-items: flex-start;">
-        <div id="message" style="display: none; padding-left: 30px;"></div>
-        <table id="found-words-table" style="padding-left: 30px; border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <th colspan="2" style="border: 1px solid black; padding: 5px;">Valid Words</th>
-                </tr>
-            </thead>
-            <tbody id="found-words-container"></tbody>
-        </table>
+    <div class="container">
+        <div class="game-container" id="game-container"></div>
+        <div class="letters" id="letters"></div>
+        <div id="word-message-container">
+            <div id="message" style="display: none; padding-left: 30px;"></div>
+            <table id="found-words-table">
+                <thead>
+                    <tr>
+                        <th>Valid Words</th>
+                    </tr>
+                </thead>
+                <tbody id="found-words-container"></tbody>
+            </table>
+        </div>
     </div>
-    
     <script>
-        
 const gameContainer = document.getElementById("game-container"), lettersContainer = document.getElementById("letters"), message = Object.assign(document.createElement("div"), {style: {display: "none", paddingLeft: "40px"}}), foundWordsContainer = Object.assign(document.createElement("div"), {style: {paddingLeft: "20px"}});
 document.body.append(message, foundWordsContainer);
 const createGrid = () => { for (let i = 0; i < 16; i++) { const cell = document.createElement("div"); cell.className = "cell"; cell.onclick = placeLetter; gameContainer.appendChild(cell); }};
@@ -93,8 +143,7 @@ function addFoundWord(word) {
 }
         
 async function checkForWords() { const gridLetters = getGridLetters(); for (let i = 0; i < 16; i++) { const row = Math.floor(i / 4), col = i % 4, getWord = (r, c) => [gridLetters[row * 4 + col], gridLetters[(row + r) * 4 + (col + c)], gridLetters[(row + r * 2) * 4 + (col + c * 2)], gridLetters[(row + r * 3) * 4 + (col + c * 3)]].join(""); const foundWordsList = [[0, 1], [1, 0], [1, 1], [1, -1]].map(([r, c]) => getWord(r, c)); for (const foundWord of foundWordsList) { if (validWords.includes(foundWord) && !foundWords.has(foundWord)) { showMessage(`Found a valid word: ${foundWord}`); foundWords.add(foundWord); addFoundWord(foundWord); break; } } } }
-    
+
     </script>
-    
 </body>
 </html>
