@@ -3,58 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Letter Grid Game</title>
+    <title>Word Game</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        #game-container {
+        .game-container {
             display: grid;
             grid-template-columns: repeat(4, 50px);
             grid-template-rows: repeat(4, 50px);
-            grid-gap: 5px;
+            gap: 4px;
         }
 
         .cell {
             width: 50px;
             height: 50px;
-            background-color: lightblue;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
+            border: 1px solid black;
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
         }
 
-        #letters {
+        .letters {
             display: flex;
             flex-wrap: wrap;
-            width: 220px;
-            margin-top: 20px;
+            width: 224px;
         }
 
         .letter {
             width: 50px;
             height: 50px;
-            background-color: lightgreen;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2.5px;
+            border: 1px solid black;
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
+            margin: 4px;
             cursor: pointer;
+        }
+
+        .letter.selected {
+            background-color: #ccc;
         }
     </style>
 </head>
 <body>
-    <div>
-        <div id="game-container"></div>
-        <div id="letters"></div>
+    <div class="game-container" id="game-container"></div>
+    <div class="letters" id="letters"></div>
+    <div id="word-message-container" style="display: flex; align-items: flex-start;">
+        <div id="message" style="display: none; padding-left: 30px;"></div>
+        <table id="found-words-table" style="padding-left: 30px; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th colspan="2" style="border: 1px solid black; padding: 5px;">Valid Words</th>
+                </tr>
+            </thead>
+            <tbody id="found-words-container"></tbody>
+        </table>
     </div>
+    
     <script>
         
 const gameContainer = document.getElementById("game-container"), lettersContainer = document.getElementById("letters"), message = Object.assign(document.createElement("div"), {style: {display: "none", paddingLeft: "40px"}}), foundWordsContainer = Object.assign(document.createElement("div"), {style: {paddingLeft: "20px"}});
@@ -81,7 +84,8 @@ function showMessage(text) {
 
 function addFoundWord(word) { const wordDiv = document.createElement("div"); wordDiv.textContent = word; foundWordsContainer.appendChild(wordDiv); }
 async function checkForWords() { const gridLetters = getGridLetters(); for (let i = 0; i < 16; i++) { const row = Math.floor(i / 4), col = i % 4, getWord = (r, c) => [gridLetters[row * 4 + col], gridLetters[(row + r) * 4 + (col + c)], gridLetters[(row + r * 2) * 4 + (col + c * 2)], gridLetters[(row + r * 3) * 4 + (col + c * 3)]].join(""); const foundWordsList = [[0, 1], [1, 0], [1, 1], [1, -1]].map(([r, c]) => getWord(r, c)); for (const foundWord of foundWordsList) { if (validWords.includes(foundWord) && !foundWords.has(foundWord)) { showMessage(`Found a valid word: ${foundWord}`); foundWords.add(foundWord); addFoundWord(foundWord); break; } } } }
-
+    
     </script>
+    
 </body>
 </html>
