@@ -68,16 +68,6 @@
     font-size: 14px; /* Set the font-size back to 14px for inner divs */
     text-align: center;
 }
-
-#found-words:empty::before {
-    content: "";
-    display: block;
-    width: 0;
-    height: 0;
-    margin: 0;
-    padding: 0;
-}
-
         
     </style>
 </head>
@@ -173,16 +163,10 @@ function getGridLetters() {
 function addToFoundWords(word) {
   const foundWordsDiv = document.getElementById("found-words");
   const existingWords = Array.from(foundWordsDiv.children).map(child => child.textContent);
-
-  if (!existingWords.includes(word)) {
-    if (foundWordsDiv.childElementCount === 0) {
-      foundWordsDiv.innerHTML = ""; // Clear the initial whitespace
-    }
     const wordDiv = document.createElement("div");
     wordDiv.textContent = word;
     foundWordsDiv.appendChild(wordDiv);
   }
-}
    
 function checkForWords() {
   const gridLetters = getGridLetters();
