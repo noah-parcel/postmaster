@@ -86,14 +86,14 @@ function createGrid() {
     gameContainer.appendChild(cell);
   }
 }
+    
 
-        
 function generateRandomLetters(count = 16) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
   const letters = [];
 
   for (let i = 0; i < count; i++) {
-    const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+    const randomLetter = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
     letters.push(randomLetter);
   }
 
