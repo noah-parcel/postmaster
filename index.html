@@ -137,24 +137,32 @@ function addToFoundWords(word) {
   wordDiv.textContent = word;
   foundWordsDiv.appendChild(wordDiv);
 }
-
+        
+        
 function checkForWords() {
   const gridLetters = getGridLetters();
-  for (let i = 0; i < 16; i++) {
-    // ... (keep existing code)
+  const rows = [];
+  const cols = [[], [], [], []];
+  
+  for (let i = 0; i < 16; i += 4) {
+    rows.push(gridLetters.slice(i, i + 4));
+  }
 
-    if (validWords.includes(horizontal)) {
-      console.log(`Found a valid word: ${horizontal}`);
-      addToFoundWords(horizontal);
-    }
-
-    if (validWords.includes(vertical)) {
-      console.log(`Found a valid word: ${vertical}`);
-      addToFoundWords(vertical);
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      cols[i].push(gridLetters[i + j * 4]);
     }
   }
-}
 
+  const combinedWords = rows.concat(cols).map(wordArr => wordArr.join(''));
+
+  combinedWords.forEach(word => {
+    if (validWords.includes(word)) {
+      console.log(`Found a valid word: ${word}`);
+      addToFoundWords(word);
+    }
+  });
+}
         
 async function initGame() {
   createGrid();
