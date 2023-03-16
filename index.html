@@ -111,9 +111,25 @@ function placeLetter(event) {
   checkForWords();
 }
 
-const validWords = [
-  "word", "test", "grid", "gain", "play", "four", "cats", "dogs", "flow", "jump"
-].map(word => word.toUpperCase());
+let validWords = [];
+
+async function fetchFourLetterWords() {
+  const response = await fetch(
+    "https://api.datamuse.com/words?sp=????"
+  );
+  const words = await response.json();
+  return words.map((wordObj) => wordObj.word.toUpperCase());
+}
+
+async function initGame() {
+  createGrid();
+  const randomLetters = generateRandomLetters();
+  displayLetters(randomLetters);
+  validWords = await fetchFourLetterWords();
+}
+
+initGame();
+   
 
 function getGridLetters() {
   const cells = document.querySelectorAll(".cell");
