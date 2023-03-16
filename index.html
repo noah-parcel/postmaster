@@ -119,17 +119,7 @@ async function fetchFourLetterWords() {
   );
   const words = await response.json();
   return words.map((wordObj) => wordObj.word.toUpperCase());
-}
-
-async function initGame() {
-  createGrid();
-  const randomLetters = generateRandomLetters();
-  displayLetters(randomLetters);
-  validWords = await fetchFourLetterWords();
-}
-
-initGame();
-   
+}  
 
 function getGridLetters() {
   const cells = document.querySelectorAll(".cell");
@@ -167,6 +157,7 @@ function checkForWords() {
 createGrid();
 const randomLetters = generateRandomLetters();
 displayLetters(randomLetters);
+validWords = await fetchFourLetterWords();
 
     </script>
 </body>
