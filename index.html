@@ -154,10 +154,15 @@ function checkForWords() {
   }
 }
 
-createGrid();
-const randomLetters = generateRandomLetters();
-displayLetters(randomLetters);
-validWords = await fetchFourLetterWords();
+        
+async function initGame() {
+  createGrid();
+  const randomLetters = generateRandomLetters();
+  displayLetters(randomLetters);
+  validWords = await fetchFourLetterWords();
+}
+        
+initGame();
 
     </script>
 </body>
