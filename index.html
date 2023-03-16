@@ -69,16 +69,17 @@ function createGrid() {
   }
 }
 
-function generateRandomLetters() {
+        
+function generateRandomLetters(count = 16) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const letters = [];
 
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < count; i++) {
     const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
     letters.push(randomLetter);
   }
 
-  return letters;
+  return count === 1 ? letters[0] : letters;
 }
 
 function displayLetters(letters) {
@@ -106,10 +107,17 @@ function placeLetter(event) {
     const letterDiv = document.querySelector(`.letter.selected`);
     letterDiv.classList.remove("selected");
     letterDiv.removeEventListener("click", selectLetter);
+    
+    // Create a new random letter and update the letterDiv
+    const newRandomLetter = generateRandomLetters(1);
+    letterDiv.textContent = newRandomLetter;
+    letterDiv.addEventListener("click", selectLetter);
+    
     selectedLetter = null;
   }
   checkForWords();
 }
+
 
 let validWords = [];
              
