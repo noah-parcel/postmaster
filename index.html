@@ -67,11 +67,6 @@
         text-align: center;
     }
         
-    #found-words::before {
-        content: "";
-        display: table;
-    }
-        
     </style>
 </head>
 <body>
@@ -161,19 +156,22 @@ function getGridLetters() {
     gridLetters.push(cells[i].textContent);
   }
   return gridLetters;
-}
-                        
+}                    
+        
 function addToFoundWords(word) {
   const foundWordsDiv = document.getElementById("found-words");
   const existingWords = Array.from(foundWordsDiv.children).map(child => child.textContent);
 
   if (!existingWords.includes(word)) {
+    if (foundWordsDiv.childElementCount === 0) {
+      foundWordsDiv.innerHTML = ""; // Clear the initial whitespace
+    }
     const wordDiv = document.createElement("div");
     wordDiv.textContent = word;
     foundWordsDiv.appendChild(wordDiv);
   }
 }
-        
+   
 function checkForWords() {
   const gridLetters = getGridLetters();
   const rows = [];
