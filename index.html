@@ -112,14 +112,15 @@ function placeLetter(event) {
 }
 
 let validWords = [];
-
+             
 async function fetchFourLetterWords() {
   const response = await fetch(
-    "https://api.datamuse.com/words?sp=????"
+    "https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt"
   );
-  const words = await response.json();
-  return words.map((wordObj) => wordObj.word.toUpperCase());
-}  
+  const wordsText = await response.text();
+  const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
+  return words;
+}
 
 function getGridLetters() {
   const cells = document.querySelectorAll(".cell");
