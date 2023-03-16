@@ -54,6 +54,7 @@
     <div>
         <div id="game-container"></div>
         <div id="letters"></div>
+        <div id="found-words"></div>
     </div>
     <script>
 const gameContainer = document.getElementById("game-container");
@@ -122,27 +123,27 @@ function getGridLetters() {
   }
   return gridLetters;
 }
+                
+function addToFoundWords(word) {
+  const foundWordsDiv = document.getElementById("found-words");
+  const wordDiv = document.createElement("div");
+  wordDiv.textContent = word;
+  foundWordsDiv.appendChild(wordDiv);
+}
 
 function checkForWords() {
   const gridLetters = getGridLetters();
   for (let i = 0; i < 16; i++) {
-    const row = Math.floor(i / 4);
-    const col = i % 4;
-
-    const horizontal = gridLetters.slice(i, i + 4).join("");
-    const vertical = [
-      gridLetters[row * 4 + col],
-      gridLetters[(row + 1) * 4 + col],
-      gridLetters[(row + 2) * 4 + col],
-      gridLetters[(row + 3) * 4 + col]
-    ].join("");
+    // ... (keep existing code)
 
     if (validWords.includes(horizontal)) {
       console.log(`Found a valid word: ${horizontal}`);
+      addToFoundWords(horizontal);
     }
 
     if (validWords.includes(vertical)) {
       console.log(`Found a valid word: ${vertical}`);
+      addToFoundWords(vertical);
     }
   }
 }
