@@ -156,14 +156,17 @@ function getGridLetters() {
   }
   return gridLetters;
 }
-                
+                        
 function addToFoundWords(word) {
   const foundWordsDiv = document.getElementById("found-words");
-  const wordDiv = document.createElement("div");
-  wordDiv.textContent = word;
-  foundWordsDiv.appendChild(wordDiv);
+  const existingWords = Array.from(foundWordsDiv.children).map(child => child.textContent);
+
+  if (!existingWords.includes(word)) {
+    const wordDiv = document.createElement("div");
+    wordDiv.textContent = word;
+    foundWordsDiv.appendChild(wordDiv);
+  }
 }
-        
         
 function checkForWords() {
   const gridLetters = getGridLetters();
