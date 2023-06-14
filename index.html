@@ -1,209 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzler</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        #game-container {
-            display: grid;
-            grid-template-columns: repeat(4, 50px);
-            grid-template-rows: repeat(4, 50px);
-            grid-gap: 5px;
-        }
-
-        .cell {
-            width: 50px;
-            height: 50px;
-            background-color: lightblue;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        #letters {
-            display: flex;
-            flex-wrap: wrap;
-            width: 220px;
-            margin-top: 20px;
-        }
-
-        .letter {
-            width: 50px;
-            height: 50px;
-            background-color: lightgreen;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 2.5px;
-            cursor: pointer;
-        }
-
-                
-#found-words {
-    margin-top: 20px;
-    width: 200px;
-    background-color: #f2f2f2;
-    padding: 10px;
-    border-radius: 5px;
-    font-size: 0; /* Add this line */
-}
-
-#found-words div {
-    background-color: #4CAF50;
-    color: white;
-    padding: 5px;
-    margin: 2.5px;
-    border-radius: 3px;
-    font-size: 14px; /* Set the font-size back to 14px for inner divs */
-    text-align: center;
-}
-        
-    </style>
+  <style>
+    td {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      border: 1px solid black;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12;
+    }
+    h2, h3 {
+      margin-bottom: 10px;
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 12;
+    }
+    .highlight {
+      background-color: yellow;
+    }
+    #found-words div {
+      font-size: 24px;
+      color: royalblue;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+    #found-words div:first-child {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div>
-        <div id="game-container"></div>
-        <div id="letters"></div>
-        <div id="found-words"></div>
-    </div>
-    <script>
-const gameContainer = document.getElementById("game-container");
-const lettersContainer = document.getElementById("letters");
+  <h3>Score: <span id="score">0</span></h3>
+  <h3><span id="timeLeft">30</span>s</h3>
+  <h3>Letter: <span id="nextLetter">-</span></h3>
+  <table id="gameBoard"></table>
+  <div id="found-words"></div>
+  <script>
+    const size = 4;
+    const gameBoard = document.getElementById('gameBoard');
+    const scoreElement = document.getElementById('score');
+    const nextLetterElement = document.getElementById('nextLetter');
+    const foundWordsDiv = document.getElementById("found-words");
+    let gameArray = Array(size).fill().map(() => Array(size).fill(''));
+    let score = 0;
+    let countdownInterval;
+    let validWords = [];
 
-function createGrid() {
-  for (let i = 0; i < 16; i++) {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.addEventListener("click", placeLetter);
-    gameContainer.appendChild(cell);
-  }
-}
-    
-
-function generateRandomLetters(count = 16) {
-  const weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
-  const letters = [];
-
-  for (let i = 0; i < count; i++) {
-    const randomLetter = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
-    letters.push(randomLetter);
-  }
-
-  return count === 1 ? letters[0] : letters;
-}
-
-function displayLetters(letters) {
-  letters.forEach(letter => {
-    const letterDiv = document.createElement("div");
-    letterDiv.textContent = letter;
-    letterDiv.className = "letter";
-    letterDiv.addEventListener("click", selectLetter);
-    lettersContainer.appendChild(letterDiv);
-  });
-}
-
-let selectedLetter = null;
-
-function selectLetter(event) {
-  const letterDiv = event.target;
-  selectedLetter = letterDiv.textContent;
-  letterDiv.classList.add("selected");
-}
-
-function placeLetter(event) {
-  const cell = event.target;
-  if (selectedLetter && !cell.textContent) {
-    cell.textContent = selectedLetter;
-    const letterDiv = document.querySelector(`.letter.selected`);
-    letterDiv.classList.remove("selected");
-    letterDiv.removeEventListener("click", selectLetter);
-    
-    // Create a new random letter and update the letterDiv
-    const newRandomLetter = generateRandomLetters(1);
-    letterDiv.textContent = newRandomLetter;
-    letterDiv.addEventListener("click", selectLetter);
-    
-    selectedLetter = null;
-  }
-  checkForWords();
-}
-
-
-let validWords = [];
-             
-async function fetchFourLetterWords() {
-  const response = await fetch(
-    "https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt"
-  );
-  const wordsText = await response.text();
-  const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
-  return words;
-}
-
-function getGridLetters() {
-  const cells = document.querySelectorAll(".cell");
-  let gridLetters = [];
-  for (let i = 0; i < 16; i++) {
-    gridLetters.push(cells[i].textContent);
-  }
-  return gridLetters;
-}                    
-        
-function addToFoundWords(word) {
-  const foundWordsDiv = document.getElementById("found-words");
-  const existingWords = Array.from(foundWordsDiv.children).map(child => child.textContent);
-  if (!existingWords.includes(word)) {
-    const wordDiv = document.createElement("div");
-    wordDiv.textContent = word;
-    foundWordsDiv.appendChild(wordDiv);
-  }
-}
-   
-function checkForWords() {
-  const gridLetters = getGridLetters();
-  const rows = [];
-  const cols = [[], [], [], []];
-  
-  for (let i = 0; i < 16; i += 4) {
-    rows.push(gridLetters.slice(i, i + 4));
-  }
-
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      cols[i].push(gridLetters[i + j * 4]);
+    async function fetchFourLetterWords() {
+      const response = await fetch(
+        "https://gist.githubusercontent.com/raspberrypisig/cc18b0f4fbc0c79ffd667d06adc0a190/raw/10abbc8e3169bec3ad3886b5e1808aed04cb766c/4-letter-words-processed-new.txt"
+      );
+      const wordsText = await response.text();
+      const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
+      return words;
     }
-  }
 
-  const combinedWords = rows.concat(cols).map(wordArr => wordArr.join(''));
-
-  combinedWords.forEach(word => {
-    if (validWords.includes(word)) {
-      console.log(`Found a valid word: ${word}`);
-      addToFoundWords(word);
+    function addToFoundWords(word) {
+      if (!word) return;
+      const existingWords = Array.from(foundWordsDiv.children).map(child => child.textContent);
+      if (!existingWords.includes(word)) {
+        const wordDiv = document.createElement("div");
+        wordDiv.textContent = word;
+        foundWordsDiv.appendChild(wordDiv);
+        score += 2;
+        scoreElement.textContent = score;
+      }
     }
-  });
-}
-        
-async function initGame() {
-  createGrid();
-  const randomLetters = generateRandomLetters();
-  displayLetters(randomLetters);
-  validWords = await fetchFourLetterWords();
-}
-        
-initGame();
 
-    </script>
+    function checkForWords() {
+      const gridLetters = gameArray.flat();
+      const rows = [];
+      const cols = [[], [], [], []];
+      
+      for (let i = 0; i < size; i++) {
+        rows.push(gridLetters.slice(i*size, (i+1)*size));
+      }
+
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          cols[i].push(gridLetters[i + j*size]);
+        }
+      }
+
+      const combinedWords = rows.concat(cols).map(wordArr => wordArr.join(''));
+
+      combinedWords.forEach(word => {
+        if (validWords.includes(word)) {
+          addToFoundWords(word);
+        }
+      });
+    }
+
+    function createTable() {
+      for (let i = 0; i < size; i++) {
+        let row = gameBoard.insertRow();
+        for (let j = 0; j < size; j++) {
+          let cell = row.insertCell();
+          cell.addEventListener('click', () => handleCellClick(i, j));
+        }
+      }
+    }
+
+    function handleCellClick(i, j) {
+      if (gameArray[i][j] === '') {
+        gameArray[i][j] = nextLetterElement.textContent;
+        gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
+        checkForWords();
+        clearInterval(countdownInterval);
+        generateLetter();
+      }
+    }
+
+    function countdown() {
+      let timeLeft = 30;
+      const timeLeftElement = document.getElementById("timeLeft");
+      timeLeftElement.textContent = timeLeft;
+
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        timeLeftElement.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          generateLetter();
+        }
+      }, 1000);
+    }
+
+    function generateLetter() {
+      clearInterval(countdownInterval);
+      countdown();
+      
+      nextLetterElement.textContent = String.fromCharCode(Math.random() * (90 - 65) + 65);
+    }
+
+    createTable();
+    countdown();
+    generateLetter();
+    fetchFourLetterWords().then(words => validWords = words);
+  </script>
 </body>
 </html>
