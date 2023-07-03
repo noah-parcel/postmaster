@@ -91,10 +91,7 @@ async function fetchFourLetterWords() {
 function addToFoundWords(word, path = []) {
   if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
     let wordDiv = document.createElement("div");
-    
-    // Add the word length indicator to the word
-    wordDiv.textContent = word + ' (' + word.length + '-letter word)';
-    
+    wordDiv.textContent = word;
     wordDiv.dataset.path = JSON.stringify(path);
     foundWordsDiv.appendChild(wordDiv);
     score += word.length - 2;
