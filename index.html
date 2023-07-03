@@ -3,7 +3,7 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>body{font-family:Arial,sans-serif;background-color:#f3f3f3;color:#333;padding:20px;}td{width:50px;height:50px;text-align:center;border:1px solid #333;font-size:20px;line-height:50px;vertical-align:middle;cursor:pointer;transition:background-color 0.2s ease;}td:hover{background-color:#3ACFC0;}td.highlight{background-color:#ffd700;}h3{font-size:18px;margin-bottom:20px;}h3 span{font-weight:bold;}#found-words div{font-size:16px;color:#3ACFC0;margin-bottom:10px;word-wrap:break-word;font-weight:bold;}#gameBoard{margin-bottom:20px;}table{border-collapse:collapse;}</style>
+  <style>body{font-family:Arial,sans-serif;background-color:#fafafa;color:#333;padding:20px;}td{width:50px;height:50px;text-align:center;border:1px solid #333;font-size:20px;line-height:50px;vertical-align:middle;cursor:pointer;transition:background-color 0.2s ease;}td:hover{background-color:#3ACFC0;}td.highlight{background-color:#3ACFC0;}h3{font-size:18px;margin-bottom:20px;}h3 span{font-weight:bold;}#found-words div{font-size:16px;color:#3ACFC0;margin-bottom:10px;word-wrap:break-word;font-weight:bold;}#gameBoard{margin-bottom:20px;}table{border-collapse:collapse;}</style>
 </head>
 
 
@@ -28,7 +28,11 @@ function addToFoundWords(word, path = []) {
     let wordDiv = document.createElement("div");
     wordDiv.textContent = word, wordDiv.dataset.path = JSON.stringify(path);
     foundWordsDiv.appendChild(wordDiv);
-    score += 2, scoreElement.textContent = score, wordDiv.addEventListener('click', e => {
+
+    // Update the score based on the length of the word
+    score += word.length - 2; // Deduct 2 from the length so that 3-letter words give 1 point and 4-letter words give 2 points
+
+    scoreElement.textContent = score, wordDiv.addEventListener('click', e => {
       gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
       JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
     });
