@@ -74,7 +74,7 @@
     let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
 
     async function fetchFourLetterWords() {
-      const response = await fetch("4-letter-words.txt");
+      const response = await fetch("valid-words.txt");
       const wordsText = await response.text();
       const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
       return words;
