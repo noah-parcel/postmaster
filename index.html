@@ -1,13 +1,10 @@
-How does this look? Are the valid words being highlighted?
-
 <!DOCTYPE html>
 <html>
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>body{font-family:Arial,sans-serif;background-color:#f3f3f3;color:#333;padding:20px;}td{width:50px;height:50px;text-align:center;border:1px solid #333;font-size:20px;line-height:50px;vertical-align:middle;cursor:pointer;transition:background-color 0.2s ease;}td:hover{background-color:#3ACFC0;}h3{font-size:18px;margin-bottom:20px;}h3 span{font-weight:bold;}#found-words div{font-size:16px;color:#3ACFC0;margin-bottom:10px;word-wrap:break-word;font-weight:bold;}#gameBoard{margin-bottom:20px;}table{border-collapse:collapse;}</style>
+  <style>body{font-family:Arial,sans-serif;background-color:#f3f3f3;color:#333;padding:20px;}td{width:50px;height:50px;text-align:center;border:1px solid #333;font-size:20px;line-height:50px;vertical-align:middle;cursor:pointer;transition:background-color 0.2s ease;}td:hover{background-color:#3ACFC0;}td.highlight{background-color:#ffd700;}h3{font-size:18px;margin-bottom:20px;}h3 span{font-weight:bold;}#found-words div{font-size:16px;color:#3ACFC0;margin-bottom:10px;word-wrap:break-word;font-weight:bold;}#gameBoard{margin-bottom:20px;}table{border-collapse:collapse;}</style>
 </head>
-
 
 
 <body>
@@ -39,11 +36,23 @@ function addToFoundWords(word, path = []) {
 }
 
 function checkForWords() {
-  const gridLetters = gameArray.flat(), rows = [], cols = Array(size).fill([]);
+  const checkWord = (word, path) => {
+    if (validWords.includes(word)) addToFoundWords(word, path);
+  };
+
   for (let i = 0; i < size; i++) {
-    rows.push(gridLetters.slice(i*size, (i+1)*size)), gridLetters.slice(i*size, (i+1)*size).map((_,idx) => [idx, i]).forEach((word, idx) => validWords.includes(word) && addToFoundWords(word, idx.slice(0)));
+    const row = gameArray[i].join('');
+    const col = gameArray.map(r => r[i]).join('');
+
+    [row, col].forEach((str, idx) => {
+      for (let len = 3; len <= 4; len++) {
+        checkWord(str.slice(0, len), Array(len).fill().map((_, j) => idx ? [j, i] : [i, j]));
+        checkWord(str.slice(-len), Array(len).fill().map((_, j) => idx ? [size - len + j, i] : [i, size - len + j]));
+      }
+    });
   }
 }
+
 
 function createTable() {
   for (let i = 0; i < size; i++) {
