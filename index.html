@@ -126,6 +126,7 @@ function createTable() {
     let row = gameBoard.insertRow();
     for (let j = 0; j < size; j++) {
       let cell = row.insertCell();
+      
       cell.addEventListener('click', () => {
         if (gameArray[i][j] === '') {
           gameArray[i][j] = nextLetterElement.textContent;
@@ -133,8 +134,8 @@ function createTable() {
           checkForWords();
           if (checkBoardFull()) {
             clearInterval(countdownInterval); // Stop the countdown if the board is full
-            timerText.classList.add('grayed-out');
-            letterText.classList.add('grayed-out');
+            document.getElementById("timeLeft").textContent = "Game over";
+            letterText.textContent = ""; // Empty the Letter: text
           } else {
             clearInterval(countdownInterval);
             generateLetter();
