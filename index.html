@@ -102,32 +102,54 @@ function addToFoundWords(word, path = []) {
       JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
     });
   }
-}
+}  
 
 function checkForWords() {
-  const checkWord = (word, path) => {
-      if (word.length >= 3 && validWords.includes(word)) {
-          // This check is to ensure that 3-letter words are either in the first 3 or last 3 squares of a row or column.
-          if(word.length == 3) {
-              if (path[0][0] > 0 || path[0][1] > 0) {
-                  return; // This 3-letter word starts after the first square in a row or column, so skip it.
-              }
-          }
-          addToFoundWords(word, path);
-      }
-  };
-  
-  for (let i = 0; i < size; i++) {
-    const row = gameArray[i].join('');
-    const col = gameArray.map(r => r[i]).join('');
-    [row, col].forEach((str, idx) => {
-      for (let len = 3; len <= 4; len++) {
-        checkWord(str.slice(0, len), Array(len).fill().map((_, j) => idx ? [j, i] : [i, j]));
-        checkWord(str.slice(-len), Array(len).fill().map((_, j) => idx ? [size - len + j, i] : [i, size - len + j]));
-      }
-    });
-  }
+    const checkWord = (word, path) => {
+        if (word.length >= 3 && word.length <= 4 && validWords.includes(word)) {
+            addToFoundWords(word, path);
+        }
+    };
+
+    const directions = [ // This represents the 8 possible directions to move in a 2D grid 
+        [-1, 0], // up
+        [1, 0], // down
+        [0, -1], // left
+        [0, 1], // right
+        [-1, -1], // up-left
+        [-1, 1], // up-right
+        [1, -1], // down-left
+        [1, 1] // down-right
+    ];
+
+    const isValid = (x, y) => x >= 0 && y >= 0 && x < size && y < size;
+
+    for(let x = 0; x < size; x++) {
+        for(let y = 0; y < size; y++) {
+            for(let dir of directions) {
+                for(let step = 0; step < 4; step++) { // make this 4 to check up to 4-letter words
+                    let path = [];
+                    let word = '';
+                    
+                    for(let step = 0; step <= 4; step++) {
+                        let nx = x + dir[0] * step;
+                        let ny = y + dir[1] * step;
+
+                        if(isValid(nx, ny)) {
+                            path.push([nx, ny]);
+                            word += gameArray[nx][ny];
+                        } else {
+                            break; // If the next cell is out of bounds, then break the loop
+                        }
+                    }
+
+                    checkWord(word, path); // Check if the constructed word is valid
+                }
+            }
+        }
+    }
 }
+
 
 function createTable() {
   for (let i = 0; i < size; i++) {
