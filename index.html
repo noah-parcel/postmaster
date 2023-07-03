@@ -1,91 +1,81 @@
+How does this look? Are the valid words being highlighted?
+
 <!DOCTYPE html>
 <html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>body{font-family:Arial,sans-serif;background-color:#f3f3f3;color:#333;padding:20px;}td{width:50px;height:50px;text-align:center;border:1px solid #333;font-size:20px;line-height:50px;vertical-align:middle;cursor:pointer;transition:background-color 0.2s ease;}td:hover{background-color:#3ACFC0;}h3{font-size:18px;margin-bottom:20px;}h3 span{font-weight:bold;}#found-words div{font-size:16px;color:#3ACFC0;margin-bottom:10px;word-wrap:break-word;font-weight:bold;}#gameBoard{margin-bottom:20px;}table{border-collapse:collapse;}</style>
+</head>
+
+
+
 <body>
-<h2>Word Finder Game</h2>
-
-<!-- Display -->
-<p>Next Letter: <span id="nextLetter"></span></p>
-<p>Time Left: <span id="timeLeft">30</span> seconds</p>
-<p>Score: <span id="score">0</span></p>
-
-<!-- Game board -->
-<div id="gameBoard"></div>
-
-<!-- Found words -->
-<h3>Found words:</h3>
-<div id="foundWords"></div>
-
+<h3>Score: <span id="score">0</span></h3>
+<h3><span id="timeLeft">30</span>s</h3>
+<h3>Letter: <span id="nextLetter">-</span></h3>
+<table id="gameBoard"></table>
+<div id="found-words"></div>
 <script>
-let validWords = []; // Will hold valid words from valid-words.txt
-let nextLetter = ""; // The next letter to be added to the grid
-let timeLeft = 30; // Countdown timer
-let score = 0; // Player's score
-let timer; // For starting and stopping the countdown timer
+const size = 4, gameBoard = document.getElementById('gameBoard'), scoreElement = document.getElementById('score'), nextLetterElement = document.getElementById('nextLetter'), foundWordsDiv = document.getElementById("found-words");
+let gameArray = Array(size).fill().map(() => Array(size).fill('')), score = 0, countdownInterval, validWords = [], weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
 
-let gameBoard = Array(4).fill().map(() => Array(4).fill(""));
-
-// Fetch the valid words
-fetch("valid-words.txt")
-    .then(response => response.text())
-    .then(data => {
-        validWords = data.split('\n');
-        validWords = validWords.map(word => word.trim().toUpperCase());
-        resetGame();
-    });
-
-function resetGame() {
-    clearInterval(timer); // Clear interval
-    nextLetter = generateRandomLetter(); // Generate a new next letter
-    document.getElementById('nextLetter').innerText = nextLetter;
-    // Fill and display the game board
-    document.getElementById('gameBoard').innerHTML = gameBoard
-        .map((row, i) => `<div>${row.map((cell, j) => `<span style="border: 1px solid; padding: 5px; cursor: pointer;" onclick='addLetterToBoard(${i}, ${j})'>${cell}</span>`).join('')}</div>`)
-        .join('');
-    timeLeft = 30;
-    timer = setInterval(updateTimer, 1000); // Start countdown
+async function fetchFourLetterWords() {
+  const response = await fetch("valid-words.txt"), wordsText = await response.text();
+  const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
+  return words;
 }
 
-function addLetterToBoard(i, j) {
-    // Add next letter to cell and generate a new next letter
-    gameBoard[i][j] = nextLetter;
-    nextLetter = generateRandomLetter();
-    document.getElementById('nextLetter').innerText = nextLetter;
-    // Update the board
-    document.getElementById('gameBoard').innerHTML = gameBoard
-        .map((row, i) => `<div>${row.map((cell, j) => `<span style="border: 1px solid; padding: 5px; cursor: pointer;" onclick='addLetterToBoard(${i}, ${j})'>${cell}</span>`).join('')}</div>`)
-        .join('');
-    // Check the board for new words
-    let foundWords = findWordsInBoard(gameBoard);
-    foundWords.forEach(word => {
-        if (!document.getElementById('foundWords').innerText.includes(word)) {
-            // If word hasn't been found before and it's 3 to 4 letters long, add to score and display it
-            document.getElementById('foundWords').innerText += `${word}\n`;
-            score += word.length - 2; // 3-letter words score 1 point, 4-letter words score 2 points
-            document.getElementById('score').innerText = score;
+function addToFoundWords(word, path = []) {
+  if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
+    let wordDiv = document.createElement("div");
+    wordDiv.textContent = word, wordDiv.dataset.path = JSON.stringify(path);
+    foundWordsDiv.appendChild(wordDiv);
+    score += 2, scoreElement.textContent = score, wordDiv.addEventListener('click', e => {
+      gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
+      JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
+    });
+  }
+}
+
+function checkForWords() {
+  const gridLetters = gameArray.flat(), rows = [], cols = Array(size).fill([]);
+  for (let i = 0; i < size; i++) {
+    rows.push(gridLetters.slice(i*size, (i+1)*size)), gridLetters.slice(i*size, (i+1)*size).map((_,idx) => [idx, i]).forEach((word, idx) => validWords.includes(word) && addToFoundWords(word, idx.slice(0)));
+  }
+}
+
+function createTable() {
+  for (let i = 0; i < size; i++) {
+    let row = gameBoard.insertRow();
+    for (let j = 0; j < size; j++) {
+      let cell = row.insertCell();
+      cell.addEventListener('click', () => {
+        if (gameArray[i][j] === '') {
+          gameArray[i][j] = nextLetterElement.textContent;
+          gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
+          checkForWords(), clearInterval(countdownInterval), generateLetter();
         }
-    });
-    resetGame();
-}
-
-function findWordsInBoard(board) {
-    // Flatten board into a string of letters
-    let string = board.reduce((acc, val) => acc.concat(val), []).join('');
-    // Find valid words in the string
-    return validWords.filter(word => string.includes(word) && word.length >= 3 && word.length <= 4);
-}
-
-function generateRandomLetter() {
-    return String.fromCharCode(65 + Math.floor(Math.random() * 26));
-}
-
-function updateTimer() {
-    timeLeft--;
-    document.getElementById('timeLeft').innerText = timeLeft;
-    if (timeLeft <= 0) {
-        resetGame();
+      });
     }
+  }
 }
-</script>
 
+function countdown() {
+  let timeLeft = document.getElementById("timeLeft").textContent = 30 ;
+  countdownInterval = setInterval(() => {
+    timeLeft--, document.getElementById("timeLeft").textContent = timeLeft;
+    timeLeft <= 0 && clearInterval(countdownInterval) && generateLetter();
+  }, 1000);
+}
+
+function generateLetter() {
+  clearInterval(countdownInterval), countdown();
+  nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
+}
+
+createTable(), countdown(), generateLetter(), fetchFourLetterWords().then(words => validWords = words);
+</script>
 </body>
+
 </html>
