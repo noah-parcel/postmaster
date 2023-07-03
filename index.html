@@ -71,12 +71,20 @@ function addToFoundWords(word, path = []) {
 function checkForWords() {
   for (let i = 0; i < size; i++) {
     [gameArray[i].join(''), gameArray.map(r => r[i]).join('')].forEach((str, idx) => {
-      for (let len = 3; len <= 4; len++) {
-        let word = str.slice(0, len);
-        validWords.includes(word) && addToFoundWords(word);
-        word = str.slice(-len);
+      // Check the first three characters
+      let word = str.slice(0, 3);
+      validWords.includes(word) && addToFoundWords(word);
+
+      // Check the last three characters
+      word = str.slice(-3);
+      validWords.includes(word) && addToFoundWords(word);
+
+      // Check four-letter words across the whole rows and columns
+      for (let startIdx = 0; startIdx <= str.length - 4; startIdx++) {
+        word = str.slice(startIdx, startIdx + 4);
         validWords.includes(word) && addToFoundWords(word);
       }
+
     });
   }
 }
