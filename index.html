@@ -32,7 +32,7 @@
     
     h3 {
       font-size: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
     h3 span {
@@ -63,7 +63,7 @@
 </head>
 <body>
   <h3 id="scoreText">Score: <span id="score">0</span></h3>
-  <h3 id="timerText"><span id="timeLeft">30</span> seconds</h3>
+  <h3 id="timerText"><span id="timeLeft">30</span> sec</h3>
   <h3 id="letterText">Letter: <span id="nextLetter">-</span></h3>
   <table id="gameBoard"></table>
   <div id="found-words"></div>
@@ -105,10 +105,17 @@ function addToFoundWords(word, path = []) {
 
 function checkForWords() {
   const checkWord = (word, path) => {
-    if (word.length >= 3 && validWords.includes(word)) {
-      addToFoundWords(word, path);
-    }
+      if (word.length >= 3 && validWords.includes(word)) {
+          // This check is to ensure that 3-letter words are either in the first 3 or last 3 squares of a row or column.
+          if(word.length == 3) {
+              if (path[0][0] > 0 || path[0][1] > 0) {
+                  return; // This 3-letter word starts after the first square in a row or column, so skip it.
+              }
+          }
+          addToFoundWords(word, path);
+      }
   };
+  
   for (let i = 0; i < size; i++) {
     const row = gameArray[i].join('');
     const col = gameArray.map(r => r[i]).join('');
