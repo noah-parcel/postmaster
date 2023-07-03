@@ -39,6 +39,10 @@
       font-weight: bold;
     }
 
+    .grayed-out {
+      color: #aaa;
+    }
+
     #found-words div {
       font-size: 18px;
       color: #3ACFC0;
@@ -57,9 +61,9 @@
   </style>
 </head>
 <body>
-  <h3>Score: <span id="score">0</span></h3>
-  <h3><span id="timeLeft">30</span>s</h3>
-  <h3>Letter: <span id="nextLetter">-</span></h3>
+  <h3 id="scoreText">Score: <span id="score">0</span></h3>
+  <h3 id="timerText"><span id="timeLeft">30</span>s</h3>
+  <h3 id="letterText">Letter: <span id="nextLetter">-</span></h3>
   <table id="gameBoard"></table>
   <div id="found-words"></div>
 <script>
@@ -67,6 +71,8 @@ const size = 4;
 let gameBoard = document.getElementById('gameBoard');
 let scoreElement = document.getElementById('score');
 let nextLetterElement = document.getElementById('nextLetter');
+let timerText = document.getElementById('timerText');
+let letterText = document.getElementById('letterText');
 let foundWordsDiv = document.getElementById("found-words");
 let gameArray = Array(size).fill().map(() => Array(size).fill(''));
 let score = 0;
@@ -87,7 +93,7 @@ function addToFoundWords(word, path = []) {
     wordDiv.textContent = word;
     wordDiv.dataset.path = JSON.stringify(path);
     foundWordsDiv.appendChild(wordDiv);
-    score += word.length - 2;  // Update score base on the word length, 3-letter words give 1 point, 4-letter words give 2 points
+    score += word.length - 2;
     scoreElement.textContent = score;
     wordDiv.addEventListener('click', e => {
       gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
@@ -126,6 +132,8 @@ function createTable() {
           checkForWords();
           if (checkBoardFull()) {
             clearInterval(countdownInterval); // Stop the countdown if the board is full
+            timerText.classList.add('grayed-out');
+            letterText.classList.add('grayed-out');
           } else {
             clearInterval(countdownInterval);
             generateLetter();
@@ -155,14 +163,7 @@ function generateLetter() {
 }
 
 function checkBoardFull() {
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      if (gameArray[i][j] === '') {
-        return false;
-      }
-    }
-  }
-  return true;
+  return gameArray.every(row => row.every(cell => cell !== ''));
 }
 
 createTable();
