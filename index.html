@@ -36,9 +36,26 @@ function addToFoundWords(word, path = []) {
 }
 
 function checkForWords() {
-  const gridLetters = gameArray.flat(), rows = [], cols = Array(size).fill([]);
   for (let i = 0; i < size; i++) {
-    rows.push(gridLetters.slice(i*size, (i+1)*size)), gridLetters.slice(i*size, (i+1)*size).map((_,idx) => [idx, i]).forEach((word, idx) => validWords.includes(word) && addToFoundWords(word, idx.slice(0)));
+    let row = gameArray[i].join('');
+    let col = gameArray.map(row => row[i]).join('');
+        
+    for (let j = 0; j < size; j++) {
+      for (let wordLength = 3; wordLength <= 4; wordLength++) {
+        if (j + wordLength <= size) {
+          let rowWord = row.substr(j, wordLength);
+          let colWord = col.substr(j, wordLength);
+          if (validWords.includes(rowWord)) {
+            let path = Array(wordLength).fill().map((_, idx) => [i, j + idx]);
+            addToFoundWords(rowWord, path);
+          }
+          if (validWords.includes(colWord)) {
+            let path = Array(wordLength).fill().map((_, idx) => [j + idx, i]);
+            addToFoundWords(colWord, path);
+          }
+        }
+      }
+    }
   }
 }
 
