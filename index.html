@@ -37,7 +37,10 @@ function addToFoundWords(word, path = []) {
 
 function checkForWords() {
   const checkWord = (word, path) => {
-    if (validWords.includes(word)) addToFoundWords(word, path);
+    if (validWords.includes(word)) {
+      addToFoundWords(word, path);
+      path.forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight')); // add highlight class to found word's path
+    }
   };
 
   for (let i = 0; i < size; i++) {
