@@ -100,15 +100,18 @@
       for (let i = 0; i < size; i++) {
         rows.push(gridLetters.slice(i*size, (i+1)*size));
       }
-
+    
       for (let i = 0; i < size; i++) {
         for (let j = 0; j < size; j++) {
           cols[i].push(gridLetters[i + j*size]);
         }
       }
-
-      const combinedWords = rows.concat(cols).map(wordArr => wordArr.join(''));
-
+    
+      const combinedWords = rows.concat(cols).flatMap(wordArr => {
+        const wordStr = wordArr.join('');
+        return [wordStr, wordStr.slice(0, 3), wordStr.slice(1)];
+      });
+    
       combinedWords.forEach(word => {
         if (validWords.includes(word)) {
           addToFoundWords(word);
