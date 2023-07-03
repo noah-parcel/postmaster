@@ -98,31 +98,21 @@ function addToFoundWords(word, path = []) {
 
 function checkForWords() {
   const checkWord = (word, path) => {
-    if (validWords.includes(word)) {
+    if (word.length >= 3 && validWords.includes(word)) {
       addToFoundWords(word, path);
     }
   };
-
   for (let i = 0; i < size; i++) {
     const row = gameArray[i].join('');
     const col = gameArray.map(r => r[i]).join('');
-
-    if(row.length === 4){
-      checkWord(row, Array(4).fill().map((_, j) => [i, j]));
-    } else {
-      checkWord(row.slice(0, 3), Array(3).fill().map((_, j) => [i, j]));
-      checkWord(row.slice(-3), Array(3).fill().map((_, j) => [i, size - 3 + j]));
-    }
-
-    if(col.length === 4){
-      checkWord(col, Array(4).fill().map((_, j) => [j, i]));
-    } else {
-      checkWord(col.slice(0, 3), Array(3).fill().map((_, j) => [j, i]));
-      checkWord(col.slice(-3), Array(3).fill().map((_, j) => [size - 3 + j, i]));
-    }
+    [row, col].forEach((str, idx) => {
+      for (let len = 3; len <= 4; len++) {
+        checkWord(str.slice(0, len), Array(len).fill().map((_, j) => idx ? [j, i] : [i, j]));
+        checkWord(str.slice(-len), Array(len).fill().map((_, j) => idx ? [size - len + j, i] : [i, size - len + j]));
+      }
+    });
   }
 }
-
 
 function createTable() {
   for (let i = 0; i < size; i++) {
