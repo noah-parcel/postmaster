@@ -1,24 +1,82 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>body{font-family:Arial,sans-serif;background-color:#fafafa;color:#333;padding:20px;}td{width:50px;height:50px;text-align:center;border:1px solid #333;font-size:20px;line-height:50px;vertical-align:middle;cursor:pointer;transition:background-color 0.2s ease;}td:hover{background-color:#3ACFC0;}td.highlight{background-color:#3ACFC0;}h3{font-size:18px;margin-bottom:20px;}h3 span{font-weight:bold;}#found-words div{font-size:18px;color:#3ACFC0;margin-bottom:10px;word-wrap:break-word;font-weight:bold;}#gameBoard{margin-bottom:20px;}table{border-collapse:collapse;}</style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #fafafa;
+      color: #333;
+      padding: 20px;
+    }
+
+    td {
+      width: 50px;
+      height: 50px;
+      text-align: center;
+      border: 1px solid #333;
+      font-size: 20px;
+      line-height: 50px;
+      vertical-align: middle;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    td:hover {
+      background-color: #3ACFC0;
+    }
+
+    td.highlight {
+      background-color: #3ACFC0;
+    }
+    
+    h3 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    h3 span {
+      font-weight: bold;
+    }
+
+    #found-words div {
+      font-size: 18px;
+      color: #3ACFC0;
+      margin-bottom: 10px;
+      word-wrap: break-word;
+      font-weight: bold;
+    }
+
+    #gameBoard {
+      margin-bottom: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+  </style>
 </head>
-
-
 <body>
-<h3>Score: <span id="score">0</span></h3>
-<h3><span id="timeLeft">30</span>s</h3>
-<h3>Letter: <span id="nextLetter">-</span></h3>
-<table id="gameBoard"></table>
-<div id="found-words"></div>
+  <h3>Score: <span id="score">0</span></h3>
+  <h3><span id="timeLeft">30</span>s</h3>
+  <h3>Letter: <span id="nextLetter">-</span></h3>
+  <table id="gameBoard"></table>
+  <div id="found-words"></div>
 <script>
-const size = 4, gameBoard = document.getElementById('gameBoard'), scoreElement = document.getElementById('score'), nextLetterElement = document.getElementById('nextLetter'), foundWordsDiv = document.getElementById("found-words");
-let gameArray = Array(size).fill().map(() => Array(size).fill('')), score = 0, countdownInterval, validWords = [], weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
+const size = 4;
+let gameBoard = document.getElementById('gameBoard');
+let scoreElement = document.getElementById('score');
+let nextLetterElement = document.getElementById('nextLetter');
+let foundWordsDiv = document.getElementById("found-words");
+let gameArray = Array(size).fill().map(() => Array(size).fill(''));
+let score = 0;
+let countdownInterval;
+let validWords = [];
+let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
 
 async function fetchFourLetterWords() {
-  const response = await fetch("valid-words.txt"), wordsText = await response.text();
+  const response = await fetch("valid-words.txt");
+  const wordsText = await response.text();
   const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
   return words;
 }
@@ -26,13 +84,12 @@ async function fetchFourLetterWords() {
 function addToFoundWords(word, path = []) {
   if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
     let wordDiv = document.createElement("div");
-    wordDiv.textContent = word, wordDiv.dataset.path = JSON.stringify(path);
+    wordDiv.textContent = word;
+    wordDiv.dataset.path = JSON.stringify(path);
     foundWordsDiv.appendChild(wordDiv);
-
-    // Update the score based on the length of the word
-    score += word.length - 2; // Deduct 2 from the length so that 3-letter words give 1 point and 4-letter words give 2 points
-
-    scoreElement.textContent = score, wordDiv.addEventListener('click', e => {
+    score += word.length - 2;  // Update score base on the word length, 3-letter words give 1 point, 4-letter words give 2 points
+    scoreElement.textContent = score;
+    wordDiv.addEventListener('click', e => {
       gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
       JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
     });
@@ -41,13 +98,13 @@ function addToFoundWords(word, path = []) {
 
 function checkForWords() {
   const checkWord = (word, path) => {
-    if (validWords.includes(word)) addToFoundWords(word, path);
+    if (word.length >= 3 && validWords.includes(word)) {
+      addToFoundWords(word, path);
+    }
   };
-
   for (let i = 0; i < size; i++) {
     const row = gameArray[i].join('');
     const col = gameArray.map(r => r[i]).join('');
-
     [row, col].forEach((str, idx) => {
       for (let len = 3; len <= 4; len++) {
         checkWord(str.slice(0, len), Array(len).fill().map((_, j) => idx ? [j, i] : [i, j]));
@@ -56,7 +113,6 @@ function checkForWords() {
     });
   }
 }
-
 
 function createTable() {
   for (let i = 0; i < size; i++) {
@@ -67,7 +123,9 @@ function createTable() {
         if (gameArray[i][j] === '') {
           gameArray[i][j] = nextLetterElement.textContent;
           gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
-          checkForWords(), clearInterval(countdownInterval), generateLetter();
+          checkForWords();
+          clearInterval(countdownInterval);
+          generateLetter();
         }
       });
     }
@@ -77,18 +135,25 @@ function createTable() {
 function countdown() {
   let timeLeft = document.getElementById("timeLeft").textContent = 30 ;
   countdownInterval = setInterval(() => {
-    timeLeft--, document.getElementById("timeLeft").textContent = timeLeft;
-    timeLeft <= 0 && clearInterval(countdownInterval) && generateLetter();
+    timeLeft--;
+    document.getElementById("timeLeft").textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(countdownInterval);
+      generateLetter();
+    }
   }, 1000);
 }
 
 function generateLetter() {
-  clearInterval(countdownInterval), countdown();
+  clearInterval(countdownInterval);
+  countdown();
   nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
 }
 
-createTable(), countdown(), generateLetter(), fetchFourLetterWords().then(words => validWords = words);
+createTable();
+countdown();
+generateLetter();
+fetchFourLetterWords().then(words => validWords = words);
 </script>
 </body>
-
 </html>
