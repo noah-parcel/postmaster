@@ -124,8 +124,12 @@ function createTable() {
           gameArray[i][j] = nextLetterElement.textContent;
           gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
           checkForWords();
-          clearInterval(countdownInterval);
-          generateLetter();
+          if (checkBoardFull()) {
+            clearInterval(countdownInterval); // Stop the countdown if the board is full
+          } else {
+            clearInterval(countdownInterval);
+            generateLetter();
+          }
         }
       });
     }
@@ -148,6 +152,17 @@ function generateLetter() {
   clearInterval(countdownInterval);
   countdown();
   nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
+}
+
+function checkBoardFull() {
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (gameArray[i][j] === '') {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 createTable();
