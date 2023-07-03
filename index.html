@@ -63,7 +63,7 @@
 </head>
 <body>
   <h3 id="scoreText">Score: <span id="score">0</span></h3>
-  <h3 id="timerText"><span id="timeLeft">30</span>s</h3>
+  <h3 id="timerText">Time: <span id="timeLeft">30</span></h3>
   <h3 id="letterText">Letter: <span id="nextLetter">-</span></h3>
   <table id="gameBoard"></table>
   <div id="found-words"></div>
@@ -134,7 +134,7 @@ function createTable() {
           checkForWords();
           if (checkBoardFull()) {
             clearInterval(countdownInterval); // Stop the countdown if the board is full
-            document.getElementById("timeLeft").textContent = "Game over";
+            document.getElementById("timeLeft").textContent = "Game Over!";
             letterText.textContent = ""; // Empty the Letter: text
           } else {
             clearInterval(countdownInterval);
