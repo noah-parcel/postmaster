@@ -80,13 +80,20 @@ let gameArray = Array(size).fill().map(() => Array(size).fill(''));
 let score = 0;
 let countdownInterval;
 let validWords = [];
-let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
+let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ".split('');
+let availableIndices = Array(weightedAlphabet.length).fill().map((_, i) => i);
+
 
 async function fetchFourLetterWords() {
-  const response = await fetch("valid-words.txt");
-  const wordsText = await response.text();
-  const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
-  return words;
+  try {
+    const response = await fetch("valid-words.txt");
+    const wordsText = await response.text();
+    const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
+    return words;
+  } catch (error) {
+    console.error('Failed to fetch valid words', error);
+    return [];
+  }
 }
 
 function addToFoundWords(word, path = []) {
@@ -104,29 +111,21 @@ function addToFoundWords(word, path = []) {
   }
 }  
 
-function checkForWords() {
+function checkForWords(i, j) {
   const checkWord = (word, path) => {
       if (word.length >= 3 && validWords.includes(word)) {
-          // This check is to ensure that 3-letter words are either in the first 3 or last 3 squares of a row or column.
-          if(word.length == 3) {
-              if (path[0][0] > 0 || path[0][1] > 0) {
-                  return; // This 3-letter word starts after the first square in a row or column, so skip it.
-              }
-          }
           addToFoundWords(word, path);
       }
   };
   
-  for (let i = 0; i < size; i++) {
-    const row = gameArray[i].join('');
-    const col = gameArray.map(r => r[i]).join('');
-    [row, col].forEach((str, idx) => {
-      for (let len = 3; len <= 4; len++) {
-        checkWord(str.slice(0, len), Array(len).fill().map((_, j) => idx ? [j, i] : [i, j]));
-        checkWord(str.slice(-len), Array(len).fill().map((_, j) => idx ? [size - len + j, i] : [i, size - len + j]));
-      }
-    });
-  }
+  const row = gameArray[i].join('');
+  const col = gameArray.map(r => r[j]).join('');
+  [row, col].forEach((str, idx) => {
+    for (let len = 3; len <= 4; len++) {
+      checkWord(str.slice(0, len), Array(len).fill().map((_, k) => idx ? [k, j] : [i, k]));
+      checkWord(str.slice(-len), Array(len).fill().map((_, k) => idx ? [size - len + k, j] : [i, size - len + k]));
+    }
+  });
 }
 
 function createTable() {
@@ -139,13 +138,10 @@ function createTable() {
         if (gameArray[i][j] === '') {
           gameArray[i][j] = nextLetterElement.textContent;
           gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
-          checkForWords();
+          checkForWords(i, j);
           if (checkBoardFull()) {
-            clearInterval(countdownInterval); // Stop the countdown if the board is full
-            timerText.classList.add('grayed-out');
-            letterText.classList.add('grayed-out');
+            endGame();
           } else {
-            clearInterval(countdownInterval);
             generateLetter();
           }
         }
@@ -160,20 +156,41 @@ function countdown() {
     timeLeft--;
     document.getElementById("timeLeft").textContent = timeLeft;
     if (timeLeft <= 0) {
-      clearInterval(countdownInterval);
       generateLetter();
     }
   }, 1000);
 }
 
+// function generateLetter() {
+//   clearInterval(countdownInterval);
+//   countdown();
+//   nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
+// }
+
+
+
 function generateLetter() {
   clearInterval(countdownInterval);
   countdown();
-  nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
+  if (availableIndices.length > 0) {
+    let randomIndex = Math.floor(Math.random() * availableIndices.length);
+    let letterIndex = availableIndices[randomIndex];
+    nextLetterElement.textContent = weightedAlphabet[letterIndex];
+    availableIndices.splice(randomIndex, 1);
+  } else {
+    endGame();
+  }
 }
+
 
 function checkBoardFull() {
   return gameArray.every(row => row.every(cell => cell !== ''));
+}
+
+function endGame() {
+  clearInterval(countdownInterval);
+  timerText.classList.add('grayed-out');
+  letterText.classList.add('grayed-out');
 }
 
 createTable();
