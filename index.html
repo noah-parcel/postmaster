@@ -1,202 +1,176 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Postmaster</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #fafafa;
-      color: #333;
-      padding: 20px;
-    }
-
-    td {
-      width: 50px;
-      height: 50px;
-      text-align: center;
-      border: 1px solid #333;
-      font-size: 20px;
-      line-height: 50px;
-      vertical-align: middle;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    td:hover {
-      background-color: #3ACFC0;
-    }
-
-    td.highlight {
-      background-color: #3ACFC0;
-    }
-    
-    h3 {
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
-
-    h3 span {
-      font-weight: bold;
-    }
-
-    .grayed-out {
-      color: #aaa;
-      font-style: italic;
-    }
-
-    #found-words div {
-      font-size: 18px;
-      color: #3ACFC0;
-      margin-bottom: 10px;
-      word-wrap: break-word;
-      font-weight: bold;
-    }
-
-    #gameBoard {
-      margin-bottom: 20px;
-    }
-
-    table {
-      border-collapse: collapse;
-    }
-  </style>
-</head>
-<body>
-  <h3 id="scoreText">Score: <span id="score">0</span></h3>
-  <h3 id="timerText"><span id="timeLeft">30</span> sec</h3>
-  <h3 id="letterText">Letter: <span id="nextLetter">-</span></h3>
-  <table id="gameBoard"></table>
-  <div id="found-words"></div>
-<script>
-const size = 4;
-let gameBoard = document.getElementById('gameBoard');
-let scoreElement = document.getElementById('score');
-let nextLetterElement = document.getElementById('nextLetter');
-let timerText = document.getElementById('timerText');
-let letterText = document.getElementById('letterText');
-let foundWordsDiv = document.getElementById("found-words");
-let gameArray = Array(size).fill().map(() => Array(size).fill(''));
-let score = 0;
-let countdownInterval;
-let validWords = [];
-let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ".split('');
-let availableIndices = Array(weightedAlphabet.length).fill().map((_, i) => i);
-
-
-async function fetchFourLetterWords() {
-  try {
-    const response = await fetch("valid-words.txt");
-    const wordsText = await response.text();
-    const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
-    return words;
-  } catch (error) {
-    console.error('Failed to fetch valid words', error);
-    return [];
-  }
-}
-
-function addToFoundWords(word, path = []) {
-  if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
-    let wordDiv = document.createElement("div");
-    wordDiv.textContent = word;
-    wordDiv.dataset.path = JSON.stringify(path);
-    foundWordsDiv.appendChild(wordDiv);
-    score += word.length - 2;
-    scoreElement.textContent = score;
-    wordDiv.addEventListener('click', e => {
-      gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
-      JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
-    });
-  }
-}  
-
-function checkForWords(i, j) {
-  const checkWord = (word, path) => {
-      if (word.length >= 3 && validWords.includes(word)) {
-          addToFoundWords(word, path);
-      }
-  };
-  
-  const row = gameArray[i].join('');
-  const col = gameArray.map(r => r[j]).join('');
-  [row, col].forEach((str, idx) => {
-    for (let len = 3; len <= 4; len++) {
-      checkWord(str.slice(0, len), Array(len).fill().map((_, k) => idx ? [k, j] : [i, k]));
-      checkWord(str.slice(-len), Array(len).fill().map((_, k) => idx ? [size - len + k, j] : [i, size - len + k]));
-    }
-  });
-}
-
-function createTable() {
-  for (let i = 0; i < size; i++) {
-    let row = gameBoard.insertRow();
-    for (let j = 0; j < size; j++) {
-      let cell = row.insertCell();
-      
-      cell.addEventListener('click', () => {
-        if (gameArray[i][j] === '') {
-          gameArray[i][j] = nextLetterElement.textContent;
-          gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
-          checkForWords(i, j);
-          if (checkBoardFull()) {
-            endGame();
-          } else {
-            generateLetter();
-          }
+    <title>Postmaster</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fafafa;
+            color: #333;
+            padding: 20px;
         }
-      });
-    }
-  }
-}
 
-function countdown() {
-  let timeLeft = document.getElementById("timeLeft").textContent = 30 ;
-  countdownInterval = setInterval(() => {
-    timeLeft--;
-    document.getElementById("timeLeft").textContent = timeLeft;
-    if (timeLeft <= 0) {
-      generateLetter();
-    }
-  }, 1000);
-}
+        td {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            border: 1px solid #333;
+            font-size: 20px;
+            line-height: 50px;
+            vertical-align: middle;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
 
-// function generateLetter() {
-//   clearInterval(countdownInterval);
-//   countdown();
-//   nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
-// }
+        td:hover {
+            background-color: #3ACFC0;
+        }
 
+        td.highlight {
+            background-color: #3ACFC0;
+        }
 
+        h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
 
-function generateLetter() {
-  clearInterval(countdownInterval);
-  countdown();
-  if (availableIndices.length > 0) {
-    let randomIndex = Math.floor(Math.random() * availableIndices.length);
-    let letterIndex = availableIndices[randomIndex];
-    nextLetterElement.textContent = weightedAlphabet[letterIndex];
-    availableIndices.splice(randomIndex, 1);
-  } else {
-    endGame();
-  }
-}
+        h3 span {
+            font-weight: bold;
+        }
 
+        .grayed-out {
+            color: #aaa;
+            font-style: italic;
+        }
 
-function checkBoardFull() {
-  return gameArray.every(row => row.every(cell => cell !== ''));
-}
+        #found-words div {
+            font-size: 18px;
+            color: #3ACFC0;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+            font-weight: bold;
+        }
 
-function endGame() {
-  clearInterval(countdownInterval);
-  timerText.classList.add('grayed-out');
-  letterText.classList.add('grayed-out');
-}
+        #gameBoard {
+            margin-bottom: 20px;
+        }
 
-createTable();
-countdown();
-generateLetter();
-fetchFourLetterWords().then(words => validWords = words);
-</script>
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+
+<body>
+    <h3 id="scoreText">Score: <span id="score">0</span></h3>
+    <h3 id="letterText">Letter: <span id="nextLetter">-</span></h3>
+    <table id="gameBoard"></table>
+    <div id="found-words"></div>
+    <script>
+        const size = 4;
+        let gameBoard = document.getElementById('gameBoard');
+        let scoreElement = document.getElementById('score');
+        let nextLetterElement = document.getElementById('nextLetter');
+        let letterText = document.getElementById('letterText');
+        let foundWordsDiv = document.getElementById("found-words");
+        let gameArray = Array(size).fill().map(() => Array(size).fill(''));
+        let score = 0;
+        let validWords = [];
+        let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ".split('');
+        let availableIndices = Array(weightedAlphabet.length).fill().map((_, i) => i);
+
+        async function fetchFourLetterWords() {
+            try {
+                const response = await fetch("valid-words.txt");
+                const wordsText = await response.text();
+                const words = wordsText.split('\n').map(word => word.trim().toUpperCase());
+                return words;
+            } catch (error) {
+                console.error('Failed to fetch valid words', error);
+                return [];
+            }
+        }
+
+        function addToFoundWords(word, path = []) {
+            if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
+                let wordDiv = document.createElement("div");
+                wordDiv.textContent = word;
+                wordDiv.dataset.path = JSON.stringify(path);
+                foundWordsDiv.appendChild(wordDiv);
+                score += word.length - 2;
+                scoreElement.textContent = score;
+                wordDiv.addEventListener('click', e => {
+                    gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
+                    JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
+                });
+            }
+        }
+
+        function checkForWords(i, j) {
+            const checkWord = (word, path) => {
+                if (word.length >= 3 && validWords.includes(word)) {
+                    addToFoundWords(word, path);
+                }
+            };
+
+            const row = gameArray[i].join('');
+            const col = gameArray.map(r => r[j]).join('');
+            [row, col].forEach((str, idx) => {
+                for (let len = 3; len <= 4; len++) {
+                    checkWord(str.slice(0, len), Array(len).fill().map((_, k) => idx ? [k, j] : [i, k]));
+                    checkWord(str.slice(-len), Array(len).fill().map((_, k) => idx ? [size - len + k, j] : [i, size - len + k]));
+                }
+            });
+        }
+
+        function createTable() {
+            for (let i = 0; i < size; i++) {
+                let row = gameBoard.insertRow();
+                for (let j = 0; j < size; j++) {
+                    let cell = row.insertCell();
+
+                    cell.addEventListener('click', () => {
+                        if (gameArray[i][j] === '') {
+                            gameArray[i][j] = nextLetterElement.textContent;
+                            gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
+                            checkForWords(i, j);
+                            if (checkBoardFull()) {
+                                endGame();
+                            } else {
+                                generateLetter();
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function generateLetter() {
+            if (availableIndices.length > 0) {
+                let randomIndex = Math.floor(Math.random() * availableIndices.length);
+                let letterIndex = availableIndices[randomIndex];
+                nextLetterElement.textContent = weightedAlphabet[letterIndex];
+                availableIndices.splice(randomIndex, 1);
+            } else {
+                endGame();
+            }
+        }
+
+        function checkBoardFull() {
+            return gameArray.every(row => row.every(cell => cell !== ''));
+        }
+
+        function endGame() {
+            letterText.classList.add('grayed-out');
+        }
+
+        createTable();
+        generateLetter();
+        fetchFourLetterWords().then(words => validWords = words);
+    </script>
 </body>
+
 </html>
