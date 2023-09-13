@@ -32,6 +32,14 @@
             background-color: #3ACFC0;
         }
 
+        td.start-of-row {
+            border-left: 3px solid red;
+        }
+
+        td.end-of-row {
+            border-right: 3px solid red;
+        }
+
         h3 {
             font-size: 20px;
             margin-bottom: 20px;
@@ -100,18 +108,40 @@
                 wordDiv.textContent = word;
                 wordDiv.dataset.path = JSON.stringify(path);
                 foundWordsDiv.appendChild(wordDiv);
-                score += word.length - 2;
+
+                // New scoring logic
+                if (word.length === 4) {
+                    score += 5;
+                } else if (word.length === 3) {
+                    if (path[0][1] === 0) { // Start of a row
+                        score += 3;
+                    } else if (path[2][1] === size - 1) { // End of a row
+                        score += 2;
+                    }
+                }
+
                 scoreElement.textContent = score;
                 wordDiv.addEventListener('click', e => {
-                    gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
-                    JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
+                    gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight', 'start-of-row', 'end-of-row'));
+                    JSON.parse(e.target.dataset.path).forEach(([i, j]) => {
+                        gameBoard.rows[i].cells[j].classList.add('highlight');
+                        if (path[0][1] === 0) {
+                            gameBoard.rows[i].cells[j].classList.add('start-of-row');
+                        }
+                        if (path[2][1] === size - 1) {
+                            gameBoard.rows[i].cells[j].classList.add('end-of-row');
+                        }
+                    });
                 });
             }
         }
 
         function checkForWords(i, j) {
             const checkWord = (word, path) => {
-                if (word.length >= 3 && validWords.includes(word)) {
+                if (word.length === 3 && validWords.includes(word)) {
+                    addToFoundWords(word, path);
+                }
+                if (word.length === 4 && validWords.includes(word)) {
                     addToFoundWords(word, path);
                 }
             };
