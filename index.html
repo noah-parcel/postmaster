@@ -91,25 +91,30 @@
             }
         }
 
+        function getWordPoints(word, path) {
+            if (word.length === 4) {
+                return 5;
+            } else if (word.length === 3) {
+                if (path[0][1] === 0 || path[0][0] === 0) { // Start of a row or top of a column
+                    return 3;
+                } else if (path[2][1] === size - 1 || path[2][0] === size - 1) { // End of a row or bottom of a column
+                    return 2;
+                }
+            }
+            return 0;
+        }
+
         function addToFoundWords(word, path = []) {
-            if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
+            if (!Array.from(foundWordsDiv.children).map(child => child.textContent.includes(word)).includes(true)) {
+                let points = getWordPoints(word, path);
+                score += points;
+                scoreElement.textContent = score;
+
                 let wordDiv = document.createElement("div");
-                wordDiv.textContent = word;
+                wordDiv.textContent = `${word} (+${points})`; // Displaying the points next to the word
                 wordDiv.dataset.path = JSON.stringify(path);
                 foundWordsDiv.appendChild(wordDiv);
 
-                // Updated scoring logic
-                if (word.length === 4) {
-                    score += 5;
-                } else if (word.length === 3) {
-                    if (path[0][1] === 0 || path[0][0] === 0) { // Start of a row or top of a column
-                        score += 3;
-                    } else if (path[2][1] === size - 1 || path[2][0] === size - 1) { // End of a row or bottom of a column
-                        score += 2;
-                    }
-                }
-
-                scoreElement.textContent = score;
                 wordDiv.addEventListener('click', e => {
                     gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
                     JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
