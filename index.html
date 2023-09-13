@@ -95,9 +95,18 @@
         }
 
         function addToFoundWords(word, path = []) {
-            if (!Array.from(foundWordsDiv.children).map(child => child.textContent).includes(word)) {
+            if (!Array.from(foundWordsDiv.children).map(child => child.textContent.includes(word)).includes(true)) {
+                let wordPosition = "";
+                if (word.length === 3) {
+                    if (path[0][0] === i && path[0][1] <= 2 || path[0][1] === j && path[0][0] <= 2) {
+                        wordPosition = " (First 3 Spaces)";
+                    } else if (path[0][0] === i && path[2][1] >= 1 || path[0][1] === j && path[2][0] >= 1) {
+                        wordPosition = " (Last 3 Spaces)";
+                    }
+                }
+        
                 let wordDiv = document.createElement("div");
-                wordDiv.textContent = word;
+                wordDiv.textContent = word + wordPosition;
                 wordDiv.dataset.path = JSON.stringify(path);
                 foundWordsDiv.appendChild(wordDiv);
                 score += word.length - 2;
