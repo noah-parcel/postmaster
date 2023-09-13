@@ -110,18 +110,28 @@
         }
 
         function checkForWords(i, j) {
-            const checkWord = (word, path) => {
-                if (word.length >= 3 && validWords.includes(word)) {
-                    addToFoundWords(word, path);
+            const directions = [
+                [1, 0], // vertically downwards
+                [0, 1], // horizontally to the right
+                [-1, 0], // vertically upwards
+                [0, -1]  // horizontally to the left
+            ];
+        
+            directions.forEach(([dx, dy]) => {
+                let word = gameArray[i][j];
+                let x = i + dx;
+                let y = j + dy;
+                
+                // Continue in the direction while within bounds and there's a letter in the cell
+                while (x >= 0 && x < size && y >= 0 && y < size && gameArray[x][y] !== '') {
+                    word += gameArray[x][y];
+                    x += dx;
+                    y += dy;
                 }
-            };
-
-            const row = gameArray[i].join('');
-            const col = gameArray.map(r => r[j]).join('');
-            [row, col].forEach((str, idx) => {
-                for (let len = 3; len <= 4; len++) {
-                    checkWord(str.slice(0, len), Array(len).fill().map((_, k) => idx ? [k, j] : [i, k]));
-                    checkWord(str.slice(-len), Array(len).fill().map((_, k) => idx ? [size - len + k, j] : [i, size - len + k]));
+                
+                // Check the word for validity and length
+                if (word.length >= 3 && validWords.includes(word)) {
+                    addToFoundWords(word);
                 }
             });
         }
