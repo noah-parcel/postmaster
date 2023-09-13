@@ -24,20 +24,9 @@
             transition: background-color 0.2s ease;
         }
 
-        td:hover {
-            background-color: #3ACFC0;
-        }
-
+        td:hover,
         td.highlight {
             background-color: #3ACFC0;
-        }
-
-        td.start-of-row {
-            border-left: 3px solid red;
-        }
-
-        td.end-of-row {
-            border-right: 3px solid red;
         }
 
         h3 {
@@ -109,29 +98,21 @@
                 wordDiv.dataset.path = JSON.stringify(path);
                 foundWordsDiv.appendChild(wordDiv);
 
-                // New scoring logic
+                // Updated scoring logic
                 if (word.length === 4) {
                     score += 5;
                 } else if (word.length === 3) {
-                    if (path[0][1] === 0) { // Start of a row
+                    if (path[0][1] === 0 || path[0][0] === 0) { // Start of a row or top of a column
                         score += 3;
-                    } else if (path[2][1] === size - 1) { // End of a row
+                    } else if (path[2][1] === size - 1 || path[2][0] === size - 1) { // End of a row or bottom of a column
                         score += 2;
                     }
                 }
 
                 scoreElement.textContent = score;
                 wordDiv.addEventListener('click', e => {
-                    gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight', 'start-of-row', 'end-of-row'));
-                    JSON.parse(e.target.dataset.path).forEach(([i, j]) => {
-                        gameBoard.rows[i].cells[j].classList.add('highlight');
-                        if (path[0][1] === 0) {
-                            gameBoard.rows[i].cells[j].classList.add('start-of-row');
-                        }
-                        if (path[2][1] === size - 1) {
-                            gameBoard.rows[i].cells[j].classList.add('end-of-row');
-                        }
-                    });
+                    gameBoard.querySelectorAll('td').forEach(cell => cell.classList.remove('highlight'));
+                    JSON.parse(e.target.dataset.path).forEach(([i, j]) => gameBoard.rows[i].cells[j].classList.add('highlight'));
                 });
             }
         }
