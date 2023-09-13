@@ -38,11 +38,6 @@
             font-weight: bold;
         }
 
-        .grayed-out {
-            color: #aaa;
-            font-style: italic;
-        }
-
         #found-words div {
             font-size: 18px;
             color: #3ACFC0;
@@ -71,7 +66,6 @@
         let gameBoard = document.getElementById('gameBoard');
         let scoreElement = document.getElementById('score');
         let nextLetterElement = document.getElementById('nextLetter');
-        let letterText = document.getElementById('letterText');
         let foundWordsDiv = document.getElementById("found-words");
         let gameArray = Array(size).fill().map(() => Array(size).fill(''));
         let score = 0;
@@ -122,24 +116,31 @@
             }
         }
 
-        function checkForWords(i, j) {
-            const checkWord = (word, path) => {
-                if (word.length === 3 && validWords.includes(word)) {
+        function exploreFromCell(i, j, directions) {
+            for (let [dx, dy] of directions) {
+                let path = [];
+                let word = '';
+                for (let step = 0; step < 4; step++) {
+                    let x = i + step * dx;
+                    let y = j + step * dy;
+                    if (x < 0 || x >= size || y < 0 || y >= size) {
+                        break;
+                    }
+                    path.push([x, y]);
+                    word += gameArray[x][y];
+                }
+                if (word.length >= 3 && validWords.includes(word)) {
                     addToFoundWords(word, path);
                 }
-                if (word.length === 4 && validWords.includes(word)) {
-                    addToFoundWords(word, path);
-                }
-            };
+            }
+        }
 
-            const row = gameArray[i].join('');
-            const col = gameArray.map(r => r[j]).join('');
-            [row, col].forEach((str, idx) => {
-                for (let len = 3; len <= 4; len++) {
-                    checkWord(str.slice(0, len), Array(len).fill().map((_, k) => idx ? [k, j] : [i, k]));
-                    checkWord(str.slice(-len), Array(len).fill().map((_, k) => idx ? [size - len + k, j] : [i, size - len + k]));
-                }
-            });
+        function checkForWords(i, j) {
+            let directions = [
+                [0, 1],  // Horizontal
+                [1, 0],  // Vertical
+            ];
+            exploreFromCell(i, j, directions);
         }
 
         function createTable() {
