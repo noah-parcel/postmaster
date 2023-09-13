@@ -111,25 +111,17 @@
 
         function checkForWords(i, j) {
             const checkWord = (word, path) => {
-                if (word.length >= 3 && validWords.includes(word) && !word.includes(' ')) {
+                if (word.length >= 3 && validWords.includes(word)) {
                     addToFoundWords(word, path);
                 }
             };
-        
-            const row = gameArray[i].join(' ');
-            const col = gameArray.map(r => r[j]).join(' ');
-        
+
+            const row = gameArray[i].join('');
+            const col = gameArray.map(r => r[j]).join('');
             [row, col].forEach((str, idx) => {
                 for (let len = 3; len <= 4; len++) {
-                    // Check for continuous words at the beginning
-                    let wordFromStart = str.slice(0, len).replace(/\s/g, '');
-                    let pathFromStart = Array(wordFromStart.length).fill().map((_, k) => idx ? [k, j] : [i, k]);
-                    checkWord(wordFromStart, pathFromStart);
-        
-                    // Check for continuous words at the end
-                    let wordFromEnd = str.slice(-len).replace(/\s/g, '');
-                    let pathFromEnd = Array(wordFromEnd.length).fill().map((_, k) => idx ? [size - wordFromEnd.length + k, j] : [i, size - wordFromEnd.length + k]);
-                    checkWord(wordFromEnd, pathFromEnd);
+                    checkWord(str.slice(0, len), Array(len).fill().map((_, k) => idx ? [k, j] : [i, k]));
+                    checkWord(str.slice(-len), Array(len).fill().map((_, k) => idx ? [size - len + k, j] : [i, size - len + k]));
                 }
             });
         }
