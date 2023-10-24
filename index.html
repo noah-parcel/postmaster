@@ -5,56 +5,66 @@
   <title>Postmaster 📬</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #fafafa;
-      color: #333;
-      padding: 20px;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 40px;
     }
-
+    
     td {
-      width: 50px;
-      height: 50px;
-      text-align: center;
-      border: 1px solid #333;
-      font-size: 20px;
-      line-height: 50px;
-      vertical-align: middle;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        border: 1px solid #e0e0e0;
+        font-size: 24px;
+        line-height: 60px;
+        vertical-align: middle;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.1s ease;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     }
-
+    
     td:hover {
-      background-color: #3ACFC0;
+        background-color: #3ACFC0;
+        transform: scale(1.05);
     }
-
+    
     td.highlight {
-      background-color: #3ACFC0;
+        background-color: #3ACFC0;
     }
     
     h3 {
-      font-size: 18px;
-      margin-bottom: 20px;
+        font-size: 24px;
+        margin-bottom: 30px;
+        color: #555;
     }
-
+    
     h3 span {
-      font-weight: bold;
+        font-weight: bold;
+        color: #2d2d2d;
     }
-
+    
     #found-words div {
-      font-size: 18px;
-      color: #3ACFC0;
-      margin-bottom: 10px;
-      word-wrap: break-word;
-      font-weight: bold;
+        font-size: 20px;
+        color: #3ACFC0;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #e0f7f4;
     }
-
+    
     #gameBoard {
-      margin-bottom: 20px;
+        margin-bottom: 30px;
+        border-spacing: 15px;  /* Add some space between cells */
+    }
+    
+    table {
+        border-collapse: separate;
     }
 
-    table {
-      border-collapse: collapse;
-    }
   </style>
 </head>
 <body>
