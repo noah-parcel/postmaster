@@ -57,22 +57,23 @@
   </style>
 </head>
 <body>
-  <h3>Score: <span id="score">0</span></h3>
-  <h3><span id="timeLeft">30</span>s</h3>
-  <h3>Letter: <span id="nextLetter">-</span></h3>
-  <table id="gameBoard"></table>
-  <div id="found-words"></div>
-<script>
-const size = 4;
-let gameBoard = document.getElementById('gameBoard');
-let scoreElement = document.getElementById('score');
-let nextLetterElement = document.getElementById('nextLetter');
-let foundWordsDiv = document.getElementById("found-words");
-let gameArray = Array(size).fill().map(() => Array(size).fill(''));
-let score = 0;
-let countdownInterval;
-let validWords = [];
-let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
+
+
+    <h3>Score: <span id="score">0</span></h3>
+    <h3>Letter: <span id="nextLetter">-</span></h3>
+    <table id="gameBoard"></table>
+    <div id="found-words"></div>
+    <script>
+    const size = 4;
+    let gameBoard = document.getElementById('gameBoard');
+    let scoreElement = document.getElementById('score');
+    let nextLetterElement = document.getElementById('nextLetter');
+    let foundWordsDiv = document.getElementById("found-words");
+    let gameArray = Array(size).fill().map(() => Array(size).fill(''));
+    let score = 0;
+    let validWords = [];
+    let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
+
 
 async function fetchFourLetterWords() {
   const response = await fetch("valid-words.txt");
@@ -120,7 +121,6 @@ function checkGameOver() {
   const flattened = gameArray.flatMap(row => row);
   if (!flattened.includes('')) { // If there's no empty cell
     // Game over
-    clearInterval(countdownInterval); // Stop countdown
     alert(`Game over! Your score is ${score}.`); // Show final score
   }
 }
@@ -135,7 +135,6 @@ function createTable() {
           gameArray[i][j] = nextLetterElement.textContent;
           gameBoard.rows[i].cells[j].textContent = nextLetterElement.textContent;
           checkForWords();
-          clearInterval(countdownInterval);
           generateLetter();
         }
       });
@@ -143,28 +142,15 @@ function createTable() {
   }
 }
 
-function countdown() {
-  let timeLeft = document.getElementById("timeLeft").textContent = 30 ;
-  countdownInterval = setInterval(() => {
-    timeLeft--;
-    document.getElementById("timeLeft").textContent = timeLeft;
-    if (timeLeft <= 0) {
-      clearInterval(countdownInterval);
-      generateLetter();
-    }
-  }, 1000);
+function generateLetter() {
+    nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
+    checkGameOver(); // Check game over when a new letter is generated
 }
 
-function generateLetter() {
-  clearInterval(countdownInterval);
-  countdown();
-  nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
-  checkGameOver(); // Check game over when a new letter is generated
-}
 createTable();
-countdown();
-generateLetter();
+generateLetter(); // Generate the initial letter when the game starts
 fetchFourLetterWords().then(words => validWords = words);
+
 </script>
 </body>
 </html>
