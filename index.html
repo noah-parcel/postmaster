@@ -83,7 +83,8 @@
     let gameArray = Array(size).fill().map(() => Array(size).fill(''));
     let score = 0;
     let validWords = [];
-    let weightedAlphabet = "AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ";
+    let weightedAlphabet = [..."AAAAAAAAABBCCDDDDEEEEEEEEEEEEFFGGGHHHHIIIIIIIIIJKLLLLMMNNNNNNOOOOOPPQRRRRRRSSSSSSTTTTTUUUVVWWXYYZ"];
+
 
 
 async function fetchFourLetterWords() {
@@ -153,9 +154,25 @@ function createTable() {
   }
 }
 
+
 function generateLetter() {
-    nextLetterElement.textContent = weightedAlphabet[Math.floor(Math.random() * weightedAlphabet.length)];
-    checkGameOver(); // Check game over when a new letter is generated
+    if (weightedAlphabet.length === 0) {  // Check if there are no more letters
+        nextLetterElement.textContent = "-";
+        checkGameOver();  // End the game if no more letters
+        return;
+    }
+
+    // Randomly select a letter
+    const randomIndex = Math.floor(Math.random() * weightedAlphabet.length);
+    const letter = weightedAlphabet[randomIndex];
+
+    // Remove the selected letter from the pool
+    weightedAlphabet.splice(randomIndex, 1);
+
+    // Display the selected letter
+    nextLetterElement.textContent = letter;
+
+    checkGameOver();  // Check game over when a new letter is generated
 }
 
 createTable();
